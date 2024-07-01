@@ -8,7 +8,9 @@ Run the following commands:
 
 1. `python -m venv westpac_hackathon` (creates a virtual environment for storing dependencies, important on Linux to avoid overwriting older Python packages with newer ones as this can break your operating system/desktop environment)
 2. Windows: `source westpac_hackathon/Scripts/activate` | Linux: `source westpac_hackathon/bin/activate` (activates the virtual environment so you can use and install dependencies)
-3. `python -m pip install "kivy[full]" kivy_examples tensorflow` (this may take a while)
+3. `python -m pip install "kivy[full]" kivy_examples tensorflow` (this may take a while, it will download ~1GB worth of packages)
+
+Reload the window (`Ctrl + Shift + P` > `Developer: Reload Window`). Done!
 
 # Test Project
 
