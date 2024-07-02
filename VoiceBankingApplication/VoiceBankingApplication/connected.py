@@ -6,3 +6,7 @@ class Connected(Screen):
         self.manager.transition = SlideTransition(direction="right")
         self.manager.current = 'login'
         self.manager.get_screen('login').resetForm()
+    
+    def readCurrentBalance(self):
+        pass
+        

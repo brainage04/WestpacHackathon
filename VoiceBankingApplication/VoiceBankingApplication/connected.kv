@@ -1,11 +1,15 @@
 <Connected>:
-    BoxLayout:
+    FloatLayout:
         orientation: 'vertical'
 
         Label:
             text: "You are now connected"
             font_size: 32
+            
         Button:
-            text: "Disconnect"
+            text: "Log Out"
             font_size: 24
             on_press: root.disconnect()
+            pos_hint: {"x":0.02, "y":0.02}
+            size_hint: (0.15,0.05)
+
