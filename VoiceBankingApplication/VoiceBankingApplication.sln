@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35013.160
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "VoiceBankingApplication", "VoiceBankingApplication\VoiceBankingApplication.pyproj", "{A09E6AF9-872B-42C3-B2FB-62825CECB154}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A09E6AF9-872B-42C3-B2FB-62825CECB154}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A09E6AF9-872B-42C3-B2FB-62825CECB154}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E548FFF3-FED6-4804-8D39-1C6E197BA166}
+	EndGlobalSection
+EndGlobal
