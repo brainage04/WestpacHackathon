@@ -2,8 +2,10 @@ from kivy.app import App
 from kivy.properties import StringProperty
 from kivy.uix.screenmanager import ScreenManager, Screen, SlideTransition
 import os
-
+from kivy.core.window import Window
 from connected import Connected
+
+Window.size = (360, 640)
 
 class Login(Screen):
     def do_login(self, loginText, passwordText):

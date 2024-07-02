@@ -1,15 +1,45 @@
 <Connected>:
+    canvas.before:
+        Color:
+            rgba: 0.1607843137254902, 0.24313725490196078, 0.4666666666666667, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
     FloatLayout:
-        orientation: 'vertical'
+        canvas:
+            Color:
+                rgba: 0.10980392156862745, 0.16862745098039217, 0.32941176470588235, 1
+            Rectangle:
+                pos: 0, 0
+                size: root.width, root.height * 0.08
+    
+        GridLayout:
+            pos_hint: {"x": 0, "y": 0}
+            size_hint: None, None
+            width: self.minimum_width
+            height: root.height * 0.08
+            cols: 4
+            rows: 1
 
-        Label:
-            text: "You are now connected"
-            font_size: 32
-            
-        Button:
-            text: "Log Out"
-            font_size: 24
-            on_press: root.disconnect()
-            pos_hint: {"x":0.02, "y":0.02}
-            size_hint: (0.15,0.05)
+            Button:
+                id: logoutButton
+                text: "Log Out"
+                font_size: 24
+                size_hint: None, None
+                width: self.texture_size[0] + 20
+                height: root.height * 0.08
+                on_press: root.disconnect()
+        
+            Label:
+                id: connectionStatus
+                text: "You are now connected"
+                font_size: 32
+                size_hint: None, None
+                width: self.texture_size[0] + 20
+                height: root.height * 0.08
 
+
+
+
+        BoxLayout:

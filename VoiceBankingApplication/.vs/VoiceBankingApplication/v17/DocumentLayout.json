@@ -3,20 +3,20 @@
   "WorkspaceRootPath": "D:\\Desktop\\GitHub Projects\\Hackathon\\WestpacHackathon\\VoiceBankingApplication\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A09E6AF9-872B-42C3-B2FB-62825CECB154}|VoiceBankingApplication\\VoiceBankingApplication.pyproj|D:\\Desktop\\GitHub Projects\\Hackathon\\WestpacHackathon\\VoiceBankingApplication\\VoiceBankingApplication\\login.kv||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{A09E6AF9-872B-42C3-B2FB-62825CECB154}|VoiceBankingApplication\\VoiceBankingApplication.pyproj|solutionrelative:VoiceBankingApplication\\login.kv||{3B902123-F8A7-4915-9F01-361F908088D0}"
+      "AbsoluteMoniker": "D:0:0:{A09E6AF9-872B-42C3-B2FB-62825CECB154}|VoiceBankingApplication\\VoiceBankingApplication.pyproj|D:\\Desktop\\GitHub Projects\\Hackathon\\WestpacHackathon\\VoiceBankingApplication\\VoiceBankingApplication\\main.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A09E6AF9-872B-42C3-B2FB-62825CECB154}|VoiceBankingApplication\\VoiceBankingApplication.pyproj|solutionrelative:VoiceBankingApplication\\main.py||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A09E6AF9-872B-42C3-B2FB-62825CECB154}|VoiceBankingApplication\\VoiceBankingApplication.pyproj|D:\\Desktop\\GitHub Projects\\Hackathon\\WestpacHackathon\\VoiceBankingApplication\\VoiceBankingApplication\\connected.kv||{3B902123-F8A7-4915-9F01-361F908088D0}",
       "RelativeMoniker": "D:0:0:{A09E6AF9-872B-42C3-B2FB-62825CECB154}|VoiceBankingApplication\\VoiceBankingApplication.pyproj|solutionrelative:VoiceBankingApplication\\connected.kv||{3B902123-F8A7-4915-9F01-361F908088D0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A09E6AF9-872B-42C3-B2FB-62825CECB154}|VoiceBankingApplication\\VoiceBankingApplication.pyproj|D:\\Desktop\\GitHub Projects\\Hackathon\\WestpacHackathon\\VoiceBankingApplication\\VoiceBankingApplication\\VoiceBankingApplication.py||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A09E6AF9-872B-42C3-B2FB-62825CECB154}|VoiceBankingApplication\\VoiceBankingApplication.pyproj|solutionrelative:VoiceBankingApplication\\VoiceBankingApplication.py||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A09E6AF9-872B-42C3-B2FB-62825CECB154}|VoiceBankingApplication\\VoiceBankingApplication.pyproj|D:\\Desktop\\GitHub Projects\\Hackathon\\WestpacHackathon\\VoiceBankingApplication\\VoiceBankingApplication\\connected.py||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{A09E6AF9-872B-42C3-B2FB-62825CECB154}|VoiceBankingApplication\\VoiceBankingApplication.pyproj|solutionrelative:VoiceBankingApplication\\connected.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A09E6AF9-872B-42C3-B2FB-62825CECB154}|VoiceBankingApplication\\VoiceBankingApplication.pyproj|D:\\Desktop\\GitHub Projects\\Hackathon\\WestpacHackathon\\VoiceBankingApplication\\VoiceBankingApplication\\login.kv||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A09E6AF9-872B-42C3-B2FB-62825CECB154}|VoiceBankingApplication\\VoiceBankingApplication.pyproj|solutionrelative:VoiceBankingApplication\\login.kv||{3B902123-F8A7-4915-9F01-361F908088D0}"
     }
   ],
   "DocumentGroupContainers": [
@@ -26,7 +26,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 5,
           "Children": [
             {
               "$type": "Bookmark",
@@ -44,27 +44,27 @@
               "RelativeDocumentMoniker": "VoiceBankingApplication\\connected.kv",
               "ToolTip": "D:\\Desktop\\GitHub Projects\\Hackathon\\WestpacHackathon\\VoiceBankingApplication\\VoiceBankingApplication\\connected.kv",
               "RelativeToolTip": "VoiceBankingApplication\\connected.kv",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA0AAAAiAAAA",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAACcAAAAqAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2024-07-02T05:04:46.495Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 2,
               "Title": "connected.py",
               "DocumentMoniker": "D:\\Desktop\\GitHub Projects\\Hackathon\\WestpacHackathon\\VoiceBankingApplication\\VoiceBankingApplication\\connected.py",
               "RelativeDocumentMoniker": "VoiceBankingApplication\\connected.py",
               "ToolTip": "D:\\Desktop\\GitHub Projects\\Hackathon\\WestpacHackathon\\VoiceBankingApplication\\VoiceBankingApplication\\connected.py",
               "RelativeToolTip": "VoiceBankingApplication\\connected.py",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAoAAAAMAAAA",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAQAAAAeAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
               "WhenOpened": "2024-07-02T05:01:35.511Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 3,
               "Title": "login.kv",
               "DocumentMoniker": "D:\\Desktop\\GitHub Projects\\Hackathon\\WestpacHackathon\\VoiceBankingApplication\\VoiceBankingApplication\\login.kv",
               "RelativeDocumentMoniker": "VoiceBankingApplication\\login.kv",
@@ -77,13 +77,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "VoiceBankingApplication.py",
-              "DocumentMoniker": "D:\\Desktop\\GitHub Projects\\Hackathon\\WestpacHackathon\\VoiceBankingApplication\\VoiceBankingApplication\\VoiceBankingApplication.py",
-              "RelativeDocumentMoniker": "VoiceBankingApplication\\VoiceBankingApplication.py",
-              "ToolTip": "D:\\Desktop\\GitHub Projects\\Hackathon\\WestpacHackathon\\VoiceBankingApplication\\VoiceBankingApplication\\VoiceBankingApplication.py",
-              "RelativeToolTip": "VoiceBankingApplication\\VoiceBankingApplication.py",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAUAAAAAAAAA",
+              "DocumentIndex": 0,
+              "Title": "main.py",
+              "DocumentMoniker": "D:\\Desktop\\GitHub Projects\\Hackathon\\WestpacHackathon\\VoiceBankingApplication\\VoiceBankingApplication\\main.py",
+              "RelativeDocumentMoniker": "VoiceBankingApplication\\main.py",
+              "ToolTip": "D:\\Desktop\\GitHub Projects\\Hackathon\\WestpacHackathon\\VoiceBankingApplication\\VoiceBankingApplication\\main.py",
+              "RelativeToolTip": "VoiceBankingApplication\\main.py",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAgAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
               "WhenOpened": "2024-07-02T04:57:18.129Z",
               "EditorCaption": ""

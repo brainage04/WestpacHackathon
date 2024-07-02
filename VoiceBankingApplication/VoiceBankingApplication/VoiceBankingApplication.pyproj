@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>a09e6af9-872b-42c3-b2fb-62825cecb154</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>VoiceBankingApplication.py</StartupFile>
+    <StartupFile>main.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -22,7 +22,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="connected.py" />
-    <Compile Include="VoiceBankingApplication.py" />
+    <Compile Include="main.py" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="banking.kv" />
