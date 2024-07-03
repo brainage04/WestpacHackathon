@@ -1,0 +1,61 @@
+#:kivy 2.0.0
+
+<LoginScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(20)
+        spacing: dp(20)
+        canvas.before:
+            Color:
+                rgba: 243/255, 244/255, 246/255, 1  # Background color
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        Image:
+            source: 'WBCLogo.png'
+            size_hint: None, None
+            size: dp(150), dp(50)
+            pos_hint: {'center_x': 0.5}
+
+        Label:
+            text: 'Login'
+            font_size: '24sp'
+            font_name: 'Roboto-Bold'  # Ensure you have Roboto-Bold.ttf
+            color: 31/255, 28/255, 79/255, 1  # Heading color
+            size_hint_y: None
+            height: self.texture_size[1]
+
+        TextInput:
+            id: username_input
+            hint_text: 'Username'
+            multiline: False
+            size_hint_y: None
+            height: dp(40)
+            font_size: '18sp'
+            font_name: 'Roboto-Regular'  # Ensure you have Roboto-Regular.ttf
+            background_color: 0.93, 0.93, 0.93, 1  # Light gray background for input
+            foreground_color: 0, 0, 0, 1  # Black text color
+
+        TextInput:
+            id: password_input
+            hint_text: 'Password'
+            multiline: False
+            size_hint_y: None
+            height: dp(40)
+            font_size: '18sp'
+            font_name: 'Roboto-Regular'  # Ensure you have Roboto-Regular.ttf
+            password: True
+            background_color: 0.93, 0.93, 0.93, 1  # Light gray background for input
+            foreground_color: 0, 0, 0, 1  # Black text color
+
+        Button:
+            text: 'Login'
+            size_hint_y: None
+            height: dp(50)
+            font_size: '18sp'
+            font_name: 'Roboto-Bold'  # Ensure you have Roboto-Bold.ttf
+            background_normal: ''
+            background_color: 218/255, 23/255, 16/255, 1  # Primary color
+            color: 1, 1, 1, 1  # White text color
+            on_release: app.login(username_input.text, password_input.text)

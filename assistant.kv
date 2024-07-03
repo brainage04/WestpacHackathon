@@ -1,0 +1,96 @@
+#:kivy 2.0.0
+
+<AssistantScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(20)
+        spacing: dp(20)
+        canvas.before:
+            Color:
+                rgba: 243/255, 244/255, 246/255, 1  # Background color
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        Image:
+            source: 'WBCLogo.png'
+            size_hint: None, None
+            size: dp(150), dp(50)
+            pos_hint: {'center_x': 0.5}
+
+        Label:
+            text: 'Welcome to the Assistant'
+            font_size: '24sp'
+            font_name: 'Roboto-Bold'  # Ensure you have Roboto-Bold.ttf
+            color: 31/255, 28/255, 79/255, 1  # Heading color
+            size_hint_y: None
+            height: self.texture_size[1]
+
+        BoxLayout:
+            orientation: 'horizontal'
+            spacing: dp(10)
+
+            Button:
+                text: 'Action 1'
+                size_hint_y: None
+                height: dp(50)
+                font_size: '18sp'
+                font_name: 'Roboto-Bold'  # Ensure you have Roboto-Bold.ttf
+                background_normal: ''
+                background_color: 218/255, 23/255, 16/255, 1  # Primary color
+                color: 1, 1, 1, 1  # White text color
+                on_release: app.perform_action_1()
+
+            Button:
+                text: 'Action 2'
+                size_hint_y: None
+                height: dp(50)
+                font_size: '18sp'
+                font_name: 'Roboto-Bold'  # Ensure you have Roboto-Bold.ttf
+                background_normal: ''
+                background_color: 218/255, 23/255, 16/255, 1  # Primary color
+                color: 1, 1, 1, 1  # White text color
+                on_release: app.perform_action_2()
+
+        Widget:  # Spacer
+            size_hint_y: None
+            height: dp(20)
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: dp(80)
+            padding: dp(10)
+
+            Button:
+                text: 'Home'
+                size_hint_x: None
+                width: dp(80)
+                font_size: '14sp'
+                font_name: 'Roboto-Bold'
+                background_normal: ''
+                background_color: 218/255, 23/255, 16/255, 1  # Primary color
+                color: 1, 1, 1, 1  # White text color
+                on_release: app.go_home()
+
+            Button:
+                text: 'Accounts'
+                size_hint_x: None
+                width: dp(100)
+                font_size: '14sp'
+                font_name: 'Roboto-Bold'
+                background_normal: ''
+                background_color: 218/255, 23/255, 16/255, 1  # Primary color
+                color: 1, 1, 1, 1  # White text color
+                on_release: app.go_accounts()
+
+            Button:
+                text: 'Settings'
+                size_hint_x: None
+                width: dp(100)
+                font_size: '14sp'
+                font_name: 'Roboto-Bold'
+                background_normal: ''
+                background_color: 218/255, 23/255, 16/255, 1  # Primary color
+                color: 1, 1, 1, 1  # White text color
+                on_release: app.go_settings()
