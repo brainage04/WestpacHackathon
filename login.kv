@@ -12,12 +12,14 @@
                 pos: self.pos
                 size: self.size
 
+        # logo
         Image:
             source: 'WBCLogo.png'
             size_hint: None, None
             size: dp(150), dp(50)
             pos_hint: {'center_x': 0.5}
 
+        # login label
         Label:
             text: 'Login'
             font_size: '24sp'
@@ -26,6 +28,7 @@
             size_hint_y: None
             height: self.texture_size[1]
 
+        # login text
         TextInput:
             id: username_input
             hint_text: 'Username'
@@ -37,6 +40,7 @@
             background_color: 0.93, 0.93, 0.93, 1  # Light gray background for input
             foreground_color: 0, 0, 0, 1  # Black text color
 
+        # Password input
         TextInput:
             id: password_input
             hint_text: 'Password'
@@ -49,9 +53,10 @@
             background_color: 0.93, 0.93, 0.93, 1  # Light gray background for input
             foreground_color: 0, 0, 0, 1  # Black text color
 
+        # Login Submit
         Button:
             text: 'Login'
-            size_hint_y: None
+            size_hint: 1, None
             height: dp(50)
             font_size: '18sp'
             font_name: 'Roboto-Bold'  # Ensure you have Roboto-Bold.ttf
