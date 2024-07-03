@@ -4,84 +4,76 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.core.window import Window
-from kivy.properties import ObjectProperty
-
 from kivy.core.audio import SoundLoader
-
-import pyaudio
-import wave
-import audioop
+import threading
+import speech_recognition as sr
 
 Window.size = (360, 640)
 
+recorded_text = ""
 
 # Load the Kv files
 Builder.load_file('login.kv')
 Builder.load_file('assistant.kv')
 
+def playSound(voiceInput):
+    # Construct the full path to the sound file based on voice input
+    sound_file = menuOptions(voiceInput)
+
+    sound = SoundLoader.load(sound_file)
+    if sound:
+        print("Sound found at %s" % sound.source)
+        print("Sound is %.3f seconds" % sound.length)
+        sound.play()
+    else:
+        print("Sound file not found or could not be loaded")
+
+def menuOptions(inputPrompt):
+    # Define menu options based on input prompt
+    match inputPrompt:
+        case "Greetings":
+            return os.path.join('Sounds', "AuthenthicateQuestion.mp3")
+        case "What is my current balance":
+            return os.path.join('Sounds', "BalanceRead.mp3")
+        case "Transfer Money":
+            return os.path.join('Sounds', "PayAmount.mp3")
+        case "Pay electric bill":
+            return os.path.join('Sounds', "PayElectricBill.mp3")
+        case "That's all thank you":
+            return os.path.join('Sounds', "Goodbye.mp3")
+        case _:
+            return os.path.join('Sounds', "IncorrectInput.mp3")
+
+def continuous_recording():
+    # Function for continuous recording and processing
+    global recorded_text
+    print("Recording started...")
+    recognizer = sr.Recognizer()
+    microphone = sr.Microphone()
+    
+    while True:
+        with microphone as source:
+            print("Listening...")
+            audio = recognizer.listen(source)
+        
+        # Process the audio
+        try:
+            text = recognizer.recognize_google(audio)
+            print("Recognized:", text)
+            recorded_text = text
+            playSound(text)  # Function to handle text response
+        except sr.UnknownValueError:
+            print("Could not understand audio")
+        except sr.RequestError as e:
+            print("Could not request results; {0}".format(e))
+
 class LoginScreen(Screen):
     pass
 
 class AssistantScreen(Screen):
-
-    def soundAuthentication(self, givenPassword):
-        match givenPassword:
-            case "Captain John One":
-                # Correct password
-                return os.path.join('Sounds', "AuthenthicateConfirmJohn.mp3")
-            
-            case "Wrong Password":
-                # Incorrect password
-                return os.path.join('Sounds', "AuthenthicateWrong.mp3")
-        
-        # Default case
-        return os.path.join('Sounds', "IncorrectInput.mp3")
-
-    def menuOptions(self, inputPrompt):
-        match inputPrompt:
-            case "Greetings":
-                return os.path.join('Sounds', "AuthenthicateQuestion.mp3")
-            case "What is my current balance":
-                return os.path.join('Sounds', "BalanceRead.mp3")
-            
-            case "Transfer Money":
-                return os.path.join('Sounds', "PayAmount.mp3")
-            
-            case "Pay electric bill":
-                return os.path.join('Sounds', "PayElectricBill.mp3")
-
-            case "That's all thank you":
-                return os.path.join('Sounds', "Goodbye.mp3")
-            
-            case _:
-                return os.path.join('Sounds', "IncorrectInput.mp3")
-            
-    def soundMenu(self):
-        return os.path.join('Sounds', "AdditionalAssistance.mp3")
-
-    def soundTransferMoney10(self):
-        return os.path.join('Sounds', "Pay10Dollars.mp3")
-
-    def soundTransferWrong(self):
-        return os.path.join('Sounds', "TransferNewAccount.mp3")
-
-    def playSound(self, voiceInput):
-        # Construct the full path to the sound file
-        sound_file = self.menuOptions(voiceInput)
-
-        sound = SoundLoader.load(sound_file)
-        if sound:
-            print("Sound found at %s" % sound.source)
-            print("Sound is %.3f seconds" % sound.length)
-            sound.play()
-        else:
-            print("Sound file not found or could not be loaded")
-    
-    
-
+    pass
 
 class MyApp(App):
-    
     
     def build(self):
         # Create a ScreenManager
@@ -89,14 +81,14 @@ class MyApp(App):
         sm.add_widget(LoginScreen(name='login'))
         sm.add_widget(AssistantScreen(name='assistant'))
         
-        # Construct the full path to the sound file
-        base_path = os.path.dirname(os.path.abspath(__file__))
-        sound_file = os.path.join(base_path, 'Sounds', 'Goodbye.mp3')
-
-        assistant_screen = sm.get_screen('assistant')
-        if assistant_screen:
-            assistant_screen.playSound("Greetings")
-
+        # Start continuous recording in a separate thread
+        recording_thread = threading.Thread(target=continuous_recording)
+        recording_thread.daemon = True  # Daemonize the thread to stop with the app
+        recording_thread.start()
+        
+        # Play initial greeting sound
+        playSound("Greetings")
+        
         return sm
 
     def login(self, username, password):
@@ -118,8 +110,5 @@ class MyApp(App):
         print('Logging out')
         self.root.current = 'login'
 
-
 if __name__ == '__main__':
     MyApp().run()
-
-
