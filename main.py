@@ -11,6 +11,7 @@ import speech_recognition as sr
 Window.size = (360, 640)
 
 recorded_text = ""
+audio_playing = False
 
 # Load the Kv files
 Builder.load_file('login.kv')
@@ -18,12 +19,15 @@ Builder.load_file('assistant.kv')
 
 def playSound(voiceInput):
     # Construct the full path to the sound file based on voice input
+    global audio_playing
     sound_file = menuOptions(voiceInput)
 
     sound = SoundLoader.load(sound_file)
     if sound:
         print("Sound found at %s" % sound.source)
         print("Sound is %.3f seconds" % sound.length)
+        audio_playing = True
+        sound.bind(on_stop=lambda _: setattr(sound, 'audio_playing', False))
         sound.play()
     else:
         print("Sound file not found or could not be loaded")
@@ -61,25 +65,90 @@ def continuous_recording():
             text = recognizer.recognize_google(audio)
             print("Recognized:", text)
             recorded_text = text
-            playSound(text)  # Function to handle text response
+            assistant_screen = MyApp.get_running_app().assistant_screen
+            login_screen = MyApp.get_running_app().login_screen
+            if assistant_screen:
+                assistant_screen.processText(text)  # Call method on AssistantScreen instance
+            if login_screen:
+                login_screen.checkPassword(text)  # Call method on AssistantScreen instance
         except sr.UnknownValueError:
             print("Could not understand audio")
         except sr.RequestError as e:
             print("Could not request results; {0}".format(e))
 
 class LoginScreen(Screen):
-    pass
+    def checkPassword(self, text):
+        # Process the recognized text
+        print(f"Processing text: {text}")
+        # Example: Perform actions based on recognized text
+        if "password" in text.lower():
+            self.passwordAuthenticate(True)
+        else:
+            self.passwordAuthenticate(False)
+
+    def passwordAuthenticate(self, passwordCorrect):
+        # Construct the full path to the sound file
+        global audio_playing
+
+        if passwordCorrect:
+            playAudioPath = os.path.join('Sounds', "AuthenthicateConfirmJohn.mp3")
+            self.manager.current = 'assistant'
+        else:
+            playAudioPath = os.path.join('Sounds', "AuthenthicateWrong.mp3")
+
+        sound = SoundLoader.load(playAudioPath)
+        if sound:
+            audio_playing = True
+            sound.bind(on_stop=lambda _: setattr(sound, 'audio_playing', False))
+            print("Sound found at %s" % sound.source)
+            print("Sound is %.3f seconds" % sound.length)
+            sound.play()
+        else:
+            print("Sound file not found or could not be loaded")
+
 
 class AssistantScreen(Screen):
-    pass
+    def log_off(self):
+        self.manager.current = 'login'
+
+    def processText(self, text):
+        # Process the recognized text
+        print(f"Processing text: {text}")
+        # Example: Perform actions based on recognized text
+        if "balance" in text.lower():
+            self.playSound("What is my current balance")
+        elif "transfer" in text.lower():
+            self.playSound("Transfer Money")
+        else:
+            self.playSound("IncorrectInput")
+
+    def playSound(self, voiceInput):
+        global audio_playing
+        # Construct the full path to the sound file
+        sound_file = menuOptions(voiceInput)
+
+        sound = SoundLoader.load(sound_file)
+        if sound:
+            print("Sound found at %s" % sound.source)
+            print("Sound is %.3f seconds" % sound.length)
+            audio_playing = True
+            sound.bind(on_stop=lambda _: setattr(sound, 'audio_playing', False))
+            sound.play()
+        else:
+            print("Sound file not found or could not be loaded")
 
 class MyApp(App):
+    assistant_screen = None  # Store a reference to AssistantScreen instance
+    login_screen = None
     
     def build(self):
         # Create a ScreenManager
         sm = ScreenManager()
-        sm.add_widget(LoginScreen(name='login'))
-        sm.add_widget(AssistantScreen(name='assistant'))
+        self.login_screen = LoginScreen(name='login')
+        self.assistant_screen = AssistantScreen(name='assistant')
+        
+        sm.add_widget(self.login_screen)
+        sm.add_widget(self.assistant_screen)
         
         # Start continuous recording in a separate thread
         recording_thread = threading.Thread(target=continuous_recording)
@@ -87,7 +156,7 @@ class MyApp(App):
         recording_thread.start()
         
         # Play initial greeting sound
-        playSound("Greetings")
+        self.assistant_screen.playSound("Greetings")
         
         return sm
 

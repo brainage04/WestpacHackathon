@@ -63,7 +63,7 @@
             padding: dp(10)
 
             Button:
-                text: 'Home'
+                text: 'Log Off'
                 size_hint_x: None
                 width: dp(80)
                 font_size: '14sp'
@@ -71,26 +71,4 @@
                 background_normal: ''
                 background_color: 218/255, 23/255, 16/255, 1  # Primary color
                 color: 1, 1, 1, 1  # White text color
-                on_release: app.go_home()
-
-            Button:
-                text: 'Accounts'
-                size_hint_x: None
-                width: dp(100)
-                font_size: '14sp'
-                font_name: 'Roboto-Bold'
-                background_normal: ''
-                background_color: 218/255, 23/255, 16/255, 1  # Primary color
-                color: 1, 1, 1, 1  # White text color
-                on_release: app.go_accounts()
-
-            Button:
-                text: 'Settings'
-                size_hint_x: None
-                width: dp(100)
-                font_size: '14sp'
-                font_name: 'Roboto-Bold'
-                background_normal: ''
-                background_color: 218/255, 23/255, 16/255, 1  # Primary color
-                color: 1, 1, 1, 1  # White text color
-                on_release: app.go_settings()
+                on_release: root.log_off()
