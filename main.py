@@ -3,6 +3,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 
+
 # Load the Kv files
 Builder.load_file('login.kv')
 Builder.load_file('assistant.kv')
@@ -39,6 +40,7 @@ class MyApp(App):
         # Implement logout logic
         print('Logging out')
         self.root.current = 'login'
+
 
 if __name__ == '__main__':
     MyApp().run()
