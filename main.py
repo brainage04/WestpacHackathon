@@ -4,6 +4,8 @@ from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.core.window import Window
 
+from kivymd.app import MDApp
+
 Window.size = (360, 640)
 
 
@@ -17,7 +19,7 @@ class LoginScreen(Screen):
 class AssistantScreen(Screen):
     pass
 
-class MyApp(App):
+class MyApp(MDApp):
     def build(self):
         # Create a ScreenManager
         sm = ScreenManager()
