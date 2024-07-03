@@ -3,8 +3,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.core.window import Window
-
-from kivymd.app import MDApp
+from kivy.properties import ObjectProperty
 
 Window.size = (360, 640)
 
@@ -19,7 +18,8 @@ class LoginScreen(Screen):
 class AssistantScreen(Screen):
     pass
 
-class MyApp(MDApp):
+
+class MyApp(App):
     def build(self):
         # Create a ScreenManager
         sm = ScreenManager()
