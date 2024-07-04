@@ -6,6 +6,8 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.core.window import Window
 from kivy.core.audio import SoundLoader
 import threading
+
+#pip install SpeechRecognition
 import speech_recognition as sr
 from kivy.clock import Clock
 from kivy.properties import ObjectProperty
