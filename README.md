@@ -3,12 +3,12 @@ This guide assumes that you are using Visual Studio Code.
 # Install Depedencies
 
 Open this project in Visual Studio Code
-Open a terminal (Ctrl + \`, should be the button to the left of the 1 key)
+Open a terminal (`Ctrl + \``, should be the button to the left of the 1 key)
 Run the following commands:
 
-1. `python -m venv westpac_hackathon` (creates a virtual environment for storing dependencies, important on Linux to avoid overwriting older Python packages with newer ones as this can break your operating system/desktop environment)
-2. Windows: `source westpac_hackathon/Scripts/activate` | Linux: `source westpac_hackathon/bin/activate` (activates the virtual environment so you can use and install dependencies)
-3. `python -m pip install "kivy[full]" kivy_examples tensorflow` (this may take a while, it will download ~1GB worth of packages)
+1. (optional) `python -m venv westpac_hackathon` (creates a virtual environment for storing dependencies, important on Linux to avoid overwriting older Python packages with newer ones as this can break your operating system/desktop environment)
+2. (optional) Windows: `source westpac_hackathon/Scripts/activate` | Linux: `source westpac_hackathon/bin/activate` (activates the virtual environment so you can use and install dependencies)
+3. `python -m pip install "kivy[full]" kivy_examples tensorflow numpy IPython` (this may take a while, it will download ~1GB worth of packages)
 
 Reload the window (`Ctrl + Shift + P` > `Developer: Reload Window`). Done!
 
@@ -19,3 +19,8 @@ To test the project, click on the `front_end.py` file and click the play button 
 # Notes
 
 Don't worry about warnings from the Tensorflow package. They are just warnings. The tensorflow package for Windows does not have GPU support, meaning that GPU support would require a Linux operating system, most likely through the Windows Subsystem for Linux (WSL) and building of the tensorflow package from scratch for your specific hardware (which I am not expecting anyone to put themselves through).
+
+# Todo
+
+Modify machine learning model to use contrastive loss function
+Test own voice samples on modified model

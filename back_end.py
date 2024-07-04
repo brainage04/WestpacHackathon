@@ -11,10 +11,6 @@ import keras
 from pathlib import Path
 from IPython.display import display, Audio
 
-# create two machine learning models:
-# 1. to register new users (requires a model to recognise unique persons by extracting features from their voice)
-# 2. to execute commands given by existing users (requires a model to convert speech to text)
-
 ## Constants
 DATASET_ROOT = "16000_pcm_speeches"
 
@@ -44,7 +40,7 @@ SAMPLING_RATE = 16000
 SCALE = 0.5
 
 BATCH_SIZE = 128
-EPOCHS = 1
+EPOCHS = 10
 
 ## Generate Dataset
 def paths_and_labels_to_dataset(audio_paths, labels):
@@ -56,13 +52,11 @@ def paths_and_labels_to_dataset(audio_paths, labels):
     label_ds = tf.data.Dataset.from_tensor_slices(labels)
     return tf.data.Dataset.zip((audio_ds, label_ds))
 
-
 def path_to_audio(path):
     """Reads and decodes an audio file."""
     audio = tf.io.read_file(path)
     audio, _ = tf.audio.decode_wav(audio, 1, SAMPLING_RATE)
     return audio
-
 
 def add_noise(audio, noises=None, scale=0.5):
     if noises is not None:
@@ -82,7 +76,6 @@ def add_noise(audio, noises=None, scale=0.5):
 
     return audio
 
-
 def audio_to_fft(audio):
     # Since tf.signal.fft applies FFT on the innermost dimension,
     # we need to squeeze the dimensions and then expand them again
@@ -97,9 +90,7 @@ def audio_to_fft(audio):
     # which represents the positive frequencies
     return tf.math.abs(fft[:, : (audio.shape[1] // 2), :])
 
-
 # Get the list of audio file paths along with their corresponding labels
-
 class_names = os.listdir(DATASET_AUDIO_PATH)
 print(
     "Our class names: {}".format(
@@ -192,6 +183,12 @@ for path in noise_paths:
         noises.extend(sample)
 noises = tf.stack(noises)
 
+print(
+    "{} noise files were split into {} noise samples where each is {} sec. long".format(
+        len(noise_paths), noises.shape[0], noises.shape[1] // SAMPLING_RATE
+    )
+)
+
 # Add noise to the training set
 train_ds = train_ds.map(
     lambda x, y: (add_noise(x, noises, scale=SCALE), y),
@@ -271,8 +268,6 @@ history = model.fit(
 )
 
 print(model.evaluate(valid_ds))
-
-keras.models.save_model(model, os.path.join(os.getcwd(), "speaker_identification_model.keras"))
 
 ## Testing Model
 SAMPLES_TO_DISPLAY = 10
