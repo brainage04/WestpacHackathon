@@ -19,13 +19,13 @@
             pos_hint: {'center_x': 0.5}
 
         Label:
-            text: 'Assistant Screen'
+            text: 'Hello, how can I help you?'
             size_hint_y: None
             height: dp(50)
             font_size: '20sp'
             color: 0.1216, 0.1098, 0.3098, 1  # Dark blue text
 
-        TextInput:
+        Label:
             id: display_recording
             hint_text: 'Displayed recording text here'
             size_hint_y: None
@@ -34,17 +34,9 @@
             background_color: (1, 1, 1, 0.5)  # Semi-transparent white for readonly field
             foreground_color: (0, 0, 0, 1)  # Black text
 
-        TextInput:
-            id: record_input
-            hint_text: 'Enter recording commands here'
-            size_hint_y: None
-            height: dp(50)
-            multiline: False
-            background_color: (1, 1, 1, 1)  # White background for input
-            foreground_color: (0, 0, 0, 1)  # Black text
-
+       
         Button:
-            text: 'Start Recording'
+            text: 'My Savings account is...'
             size_hint_y: None
             height: dp(50)
             background_normal: ''
@@ -53,10 +45,29 @@
             on_release: root.start_recording()
 
         Button:
-            text: 'Stop Recording'
+            text: 'My account balance is'
             size_hint_y: None
             height: dp(50)
             background_normal: ''
             background_color: 0.8549, 0.0902, 0.0627, 1  # Red color for buttons
             color: 1, 1, 1, 1  # White text
             on_release: root.stop_recording()
+
+        Button:
+            text: 'Transfer to ...'
+            size_hint_y: None
+            height: dp(50)
+            background_normal: ''
+            background_color: 0.8549, 0.0902, 0.0627, 1  # Red color for buttons
+            color: 1, 1, 1, 1  # White text
+            on_release: root.start_recording()
+
+        Button:
+            text: 'Your expenses are predicted to be ...'
+            size_hint_y: None
+            height: dp(50)
+            background_normal: ''
+            background_color: 0.8549, 0.0902, 0.0627, 1  # Red color for buttons
+            color: 1, 1, 1, 1  # White text
+            on_release: root.start_recording()
+
