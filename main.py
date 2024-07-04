@@ -18,6 +18,7 @@ audio_playing = True
 assistant_option = "start"
 assistant_option_state = 0
 insideOption = False
+waitingInput = False
 
 # Load the Kv files
 Builder.load_file('login.kv')
@@ -182,7 +183,7 @@ class AssistantScreen(Screen):
                 assistant_option = "logout"
                 insideOption = True
             else:
-                self.playSound("IncorrectInput")
+                self.playSoundIncorrectInput()
         else:
             if assistant_option == "balance":
                 self.chainReadBalance()
@@ -191,9 +192,7 @@ class AssistantScreen(Screen):
             elif assistant_option == "pay bill":
                 insideOption = False
             elif assistant_option == "logout":
-                insideOption = False
-                self.chainLogOut
-
+                self.chainLogOut()
             else:
                 insideOption = False
             
@@ -204,7 +203,58 @@ class AssistantScreen(Screen):
         assistant_option_state = 0
         insideOption = False
         self.playSound ("balance")
+    
+    def chainTransfer(self):
+        global insideOption
+        global assistant_option_state
+        global recorded_text
+        global waitingInput
+        global audio_playing
 
+        match assistant_option_state:
+            case 0:
+                #Ask Name
+                if not audio_playing:
+                    # Darren Smith
+                    if "Darren" in recorded_text.lower():
+                        assistant_option_state = 1
+                    else:
+                        assistant_option_state = 5   
+                else:
+                    self.playSoundFile("TransferAccount.mp3")
+            case 1:
+                # Confirm Name
+                if not audio_playing:
+                    assistant_option_state = 2
+                else:
+                    self.playSoundFile("TransferDarrenSmith.mp3")
+            case 2:
+                # confirm amount
+                if not audio_playing:
+                    assistant_option_state = 3
+                else:
+                    self.playSoundFile("Pay10Dollars.mp3")
+            case 3:
+                # Payment Name
+                if not audio_playing:
+                    assistant_option_state = 4
+                else:
+                    self.playSoundFile("PaymentName.mp3")
+            case 4:
+                # Finished
+                if not audio_playing:
+                    assistant_option_state = 0
+                    insideOption = False
+                else:
+                    self.playSoundFile("PayTransfer.mp3")
+
+            case 5:
+                if not audio_playing:
+                    assistant_option_state = 0
+                    insideOption = False
+                else:
+                    self.playSoundFile("TransferNewAccount.mp3")
+    
     def chainLogOut(self):
         global insideOption
         global assistant_option_state
@@ -212,9 +262,12 @@ class AssistantScreen(Screen):
         assistant_option_state = 0
         insideOption = False
 
-        Clock.schedule_once(lambda dt: self.change_to_assistant_screen())
+        Clock.schedule_once(lambda dt: self.change_to_login_screen())
         self.manager.current = 'login'
         self.playSound ("goodbye")
+
+    def change_to_login_screen(self):
+        self.manager.current = 'login'
 
     def playSound(self, voiceInput):
         global audio_playing
@@ -230,11 +283,42 @@ class AssistantScreen(Screen):
             sound.play()
         else:
             print("Sound file not found or could not be loaded")
+    
+    def playSoundIncorrectInput(self):
+        global audio_playing
+        # Construct the full path to the sound file
+        sound_file = os.path.join('Sounds', "IncorrectInput.mp3")
+
+        sound = SoundLoader.load(sound_file)
+        if sound:
+            audio_playing = True
+            sound.bind(on_stop=self.playSoundFile("AdditionalAssistance.mp3"))
+            print("Sound found at %s" % sound.source)
+            print("Sound is %.3f seconds" % sound.length)
+            sound.play()
+        else:
+            print("Sound file not found or could not be loaded")
+
+    def playSoundFile(self, soundFileName):
+        global audio_playing
+        # Construct the full path to the sound file
+        sound_file = os.path.join('Sounds', soundFileName)
+
+        sound = SoundLoader.load(sound_file)
+        if sound:
+            audio_playing = True
+            sound.bind(on_stop=self.audioPlayingFalse)
+            print("Sound found at %s" % sound.source)
+            print("Sound is %.3f seconds" % sound.length)
+            sound.play()
+        else:
+            print("Sound file not found or could not be loaded")
 
     def audioPlayingFalse(self, _):
         global audio_playing
         audio_playing = False
         print("Sound finished playing and audio_playing is: ", audio_playing)
+        
     
 
 class MyApp(App):

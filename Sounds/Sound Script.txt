@@ -15,7 +15,7 @@ AuthenticateWrong.mp3:
 GreetingJohn.mp3:
 "Hello, John. How can I assist you today?
 
-AdditionalAssistance.mp3":
+AdditionalAssistance.mp3:
 "Is there anything else you would like assistance with?"
 
 Goodbye.mp3:
