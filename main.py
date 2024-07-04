@@ -15,8 +15,9 @@ Window.size = (360, 640)
 
 recorded_text = ""
 audio_playing = True
-assistant_option = "First"
+assistant_option = "start"
 assistant_option_state = 0
+insideOption = False
 
 # Load the Kv files
 Builder.load_file('login.kv')
@@ -45,13 +46,13 @@ def audioPlayingFalse(self, _):
 def menuOptions(inputPrompt):
     # Define menu options based on input prompt
     match inputPrompt:
-        case "What is my current balance":
+        case "balance":
             return os.path.join('Sounds', "BalanceRead.mp3")
         case "Transfer Money":
             return os.path.join('Sounds', "PayAmount.mp3")
         case "Pay electric bill":
             return os.path.join('Sounds', "PayElectricBill.mp3")
-        case "That's all thank you":
+        case "goodbye":
             return os.path.join('Sounds', "Goodbye.mp3")
         case _:
             return os.path.join('Sounds', "IncorrectInput.mp3")
@@ -114,7 +115,7 @@ class LoginScreen(Screen):
 
     def checkPassword(self, text):
         recognized_phrase = "password"
-        if recognized_phrase in text.lower():
+        if recognized_phrase == text.lower():
             self.passwordAuthenticate(True)
         else:
             self.passwordAuthenticate(False)
@@ -144,8 +145,6 @@ class LoginScreen(Screen):
         audio_playing = False
         print("Sound finished playing and audio_playing is: ", audio_playing)
 
-
-
     def change_to_assistant_screen(self):
         self.manager.current = 'assistant'
 
@@ -164,6 +163,58 @@ class AssistantScreen(Screen):
             self.playSound("Transfer Money")
         else:
             self.playSound("IncorrectInput")
+
+    def optionSelect(self, text):
+        global assistant_option
+        global insideOption
+        global assistant_option_state
+        if insideOption == False:
+            if ("check current balance" in text.lower):
+                assistant_option = "balance"
+                insideOption = True
+            elif "transfer money" in text.lower:
+                assistant_option = "transfer"
+                insideOption = True
+            elif "pay electric bill" in text.lower:
+                assistant_option = "pay bill"
+                insideOption = True
+            elif "no thank you" in text.lower:
+                assistant_option = "logout"
+                insideOption = True
+            else:
+                self.playSound("IncorrectInput")
+        else:
+            if assistant_option == "balance":
+                self.chainReadBalance()
+            elif assistant_option == "transfer":
+                insideOption = False
+            elif assistant_option == "pay bill":
+                insideOption = False
+            elif assistant_option == "logout":
+                insideOption = False
+                self.chainLogOut
+
+            else:
+                insideOption = False
+            
+    def chainReadBalance(self, currentState):
+        global insideOption
+        global assistant_option_state
+        
+        assistant_option_state = 0
+        insideOption = False
+        self.playSound ("balance")
+
+    def chainLogOut(self):
+        global insideOption
+        global assistant_option_state
+        
+        assistant_option_state = 0
+        insideOption = False
+
+        Clock.schedule_once(lambda dt: self.change_to_assistant_screen())
+        self.manager.current = 'login'
+        self.playSound ("goodbye")
 
     def playSound(self, voiceInput):
         global audio_playing
