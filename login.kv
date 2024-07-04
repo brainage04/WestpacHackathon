@@ -30,7 +30,7 @@
             TextInput:
                 id: customer_id
                 hint_text: 'Customer ID'
-                background_color: (0, 0, 0, 0)  # Transparent background
+                background_color: (0, 0, 0, 0.5)  # Transparent background
                 foreground_color: (1, 1, 1, 1)  # White text
 
         BoxLayout:
@@ -47,7 +47,7 @@
                 id: password
                 hint_text: 'Password'
                 password: True
-                background_color: (0, 0, 0, 0)  # Transparent background
+                background_color: (0, 0, 0, 0.5)  # Transparent background
                 foreground_color: (1, 1, 1, 1)  # White text
 
         Label:
@@ -57,13 +57,12 @@
             height: dp(30)
 
         Button:
-            text: 'Sign in'
+            text: 'Log in'
             background_color: 0.8549, 0.0902, 0.0627, 1  # Red color
             size_hint_y: None
             height: dp(50)
+            on_release: app.root.current = 'assistant'
 
-        Button:
-            text: 'Register for online banking'
-            background_color: (0.5, 0.5, 0.5, 1)  # Grey color
-            size_hint_y: None
-            height: dp(50)
+
+
+      
