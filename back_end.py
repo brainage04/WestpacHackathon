@@ -40,7 +40,7 @@ SAMPLING_RATE = 16000
 SCALE = 0.5
 
 BATCH_SIZE = 128
-EPOCHS = 1
+EPOCHS = 10
 
 ## Generate Dataset
 def paths_and_labels_to_dataset(audio_paths, labels):
