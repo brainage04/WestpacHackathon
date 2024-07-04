@@ -27,19 +27,22 @@ def playSound(voiceInput):
 
     sound = SoundLoader.load(sound_file)
     if sound:
+        audio_playing = True
+        sound.bind(on_stop=audioPlayingFalse)
         print("Sound found at %s" % sound.source)
         print("Sound is %.3f seconds" % sound.length)
-        audio_playing = True
-        sound.bind(on_stop=lambda _: setattr(sound, 'audio_playing', False))
         sound.play()
     else:
         print("Sound file not found or could not be loaded")
 
+def audioPlayingFalse(self, _):
+    global audio_playing
+    audio_playing = False
+    print("Sound finished playing and audio_playing is: ", audio_playing)
+
 def menuOptions(inputPrompt):
     # Define menu options based on input prompt
     match inputPrompt:
-        case "Greetings":
-            return os.path.join('Sounds', "AuthenthicateQuestion.mp3")
         case "What is my current balance":
             return os.path.join('Sounds', "BalanceRead.mp3")
         case "Transfer Money":
@@ -60,11 +63,11 @@ def continuous_recording():
     microphone = sr.Microphone()
     
     while True:
-        with microphone as source:
-            print("Listening...")
-            audio = recognizer.listen(source)
-
         if not audio_playing:
+            with microphone as source:
+                print("Listening...")
+                audio = recognizer.listen(source)
+            
             try:
                 text = recognizer.recognize_google(audio)
                 print("Recognized:", text)
@@ -81,8 +84,6 @@ def continuous_recording():
                 print("Could not understand audio")
             except sr.RequestError as e:
                 print("Could not request results; {0}".format(e))
-        else:
-            print("Audio is playing, waiting for it to finish.")
 
 class LoginScreen(Screen):
     def on_enter(self):
@@ -92,7 +93,8 @@ class LoginScreen(Screen):
         global audio_playing
         # Construct the full path to the sound file
         print("Greeting")
-        sound_file = menuOptions("Greetings")
+        audio_playing = True
+        sound_file = os.path.join('Sounds', "AuthenthicateQuestion.mp3")
 
         sound = SoundLoader.load(sound_file)
         if sound:
@@ -168,13 +170,18 @@ class AssistantScreen(Screen):
 
         sound = SoundLoader.load(sound_file)
         if sound:
+            audio_playing = True
+            sound.bind(on_stop=self.audioPlayingFalse)
             print("Sound found at %s" % sound.source)
             print("Sound is %.3f seconds" % sound.length)
-            audio_playing = True
-            sound.bind(on_stop=lambda _: setattr(sound, 'audio_playing', False))
             sound.play()
         else:
             print("Sound file not found or could not be loaded")
+
+    def audioPlayingFalse(self, _):
+        global audio_playing
+        audio_playing = False
+        print("Sound finished playing and audio_playing is: ", audio_playing)
     
 
 class MyApp(App):

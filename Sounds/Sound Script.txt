@@ -1,0 +1,81 @@
+==== Authentication =======
+AuthenticateQuestion.mp3:
+"Please say your password to authenticate your voice. 
+
+AuthenthicateConfirm.mp3
+"Your identity has been confirmed"
+
+AuthenticateWrong.mp3:
+"I'm sorry, this voice has not been recognised by this account."
+
+
+
+==== Assistance General =====
+
+GreetingJohn.mp3:
+"Hello, John. How can I assist you today?
+
+AdditionalAssistance.mp3":
+"Is there anything else you would like assistance with?"
+
+Goodbye.mp3:
+"Thank you, have a nice day."
+
+
+IncorrectInput.mp3:
+"I'm sorry, I don't understand"
+
+==== Balance ====
+
+BalanceRead.mp3:
+"Sure, you currently have $1234 in your account"
+
+
+==== Transfers and Payments ====
+
+PayElectricBill.mp3:
+"Okay, you want to pay your electric bill, is this correct?"
+
+
+TransferAccount.mp3:
+"Sure, who would you like to transfer the money to?"
+
+TransferDarrenSmith:
+"You want to transfer to Darren Smith, is this correct?"
+
+PayAmount:
+"Okay, how much do you want to transfer"
+
+
+Pay10Dollars:
+"10 dollars, is this correct?"
+
+PaymentName.mp3:
+"Okay, what would you like to name this payment?"
+
+
+PayTransfer:
+"Okay, transferring the payment"
+
+TransferNewAccount:
+"I'm sorry, as this is a new account, you will have to contact the bank."
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
