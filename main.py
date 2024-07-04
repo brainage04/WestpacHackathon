@@ -9,6 +9,18 @@ import threading
 import speech_recognition as sr
 from kivy.clock import Clock
 
+
+import struct
+
+#pip3 install pvrecorder
+from pvrecorder import PvRecorder
+recorder = PvRecorder(device_index=-1, frame_length=512)
+recorderAudio = []
+import wave
+
+#pip install PyAudio
+import pyaudio
+
 # Download GStreamer
 
 Window.size = (360, 640)
@@ -61,6 +73,8 @@ def continuous_recording():
     # Function for continuous recording and processing
     global recorded_text
     global audio_playing
+    global recorder
+
     print("Recording started...")
     recognizer = sr.Recognizer()
     microphone = sr.Microphone()
@@ -71,6 +85,19 @@ def continuous_recording():
                 print("Listening...")
                 audio = recognizer.listen(source)
             
+            try:
+                recorder.start()
+                with wave.open(os.path.join('Sounds'), 'w') as f:
+                    f.setparams((1, 2, 16000, 512, "NONE", "NONE"))
+                    f.writeframes(struct.pack("h" * len(audio), *audio))
+                while True:
+                    frame = recorder.read()
+                    audio.extend(frame)
+            except KeyboardInterrupt:
+                recorder.stop()
+            finally:
+                recorder.delete()
+    
             try:
                 text = recognizer.recognize_google(audio)
                 print("Recognized:", text)
@@ -366,6 +393,7 @@ class MyApp(App):
         # Implement logout logic
         print('Logging out')
         self.root.current = 'login'
+    
     
     
     
