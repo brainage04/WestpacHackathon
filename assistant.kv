@@ -4,7 +4,7 @@
     BoxLayout:
         orientation: 'vertical'
         padding: dp(20)
-        spacing: dp(20)
+        spacing: dp(10)  # Adjust overall spacing between widgets
         canvas.before:
             Color:
                 rgba: 0.9529, 0.9569, 0.9647, 1  # Light grey background
@@ -16,22 +16,17 @@
             orientation: 'horizontal'
             size_hint_y: None
             height: dp(60)
-
             Button:
                 text: '< Back'
                 size_hint_x: None
                 width: dp(100)
                 on_release: app.root.current = 'login'  # Navigate back to the login screen
 
-            Widget:  # Spacer to push the logo to the right
-                size_hint_x: None
-                width: dp(300)
-
             Image:
                 source: 'WBCLogo_red.png'
                 size_hint: None, None
                 size: dp(250), dp(50)
-                pos_hint: {'center_x': 0.5}
+                pos_hint: {'center_x':1, 'center_y': 0.5}
 
         Label:
             text: 'Hello, how can I help you?'
@@ -39,47 +34,30 @@
             height: dp(40)
             font_size: '20sp'
             color: 0.1216, 0.1098, 0.3098, 1
+            size_hint_x: 1
             text_size: self.width, None
+            valign: 'middle'
             halign: 'left'
 
-        BoxLayout:
-            orientation: 'horizontal'
+        Widget:
+            # Spacer to add space between the label and text input area
             size_hint_y: None
-            height: dp(50)
-
-            Label:  # Readonly display area for the response
-                id: display_recording
-                text: ''
-                size_hint_x: None
-                width: dp(350)  # Set width for alignment
-                background_color: (1, 1, 1, 0.5)
-                color: (0, 0, 0, 1)
-                text_size: self.width, None
-                halign: 'right'  # Align text to the right
-
-            Label:  # Assistant response
-                id: assistant_response
-                text: ''
-                size_hint_x: None
-                width: dp(350)  # Set width for alignment
-                background_color: (1, 1, 1, 0.5)
-                color: (0, 0, 0, 1)
-                text_size: self.width, None
-                halign: 'left'  # Align text to the left
+            height: dp(400)
 
         BoxLayout:
             orientation: 'horizontal'
             size_hint_y: None
             height: dp(50)
-
             TextInput:
                 id: user_input
                 hint_text: 'Type your message here...'
                 size_hint_x: None
-                width: dp(350)
+                width: dp(300)
                 multiline: False
 
             Button:
                 text: 'Send'
                 background_color: 0.8549, 0.0902, 0.0627, 1  # Red color
-                on_release: root.process_response(user_input.text)  # Process the user's input instead of the recording's text
+                size_hint_x: None
+                width: dp(100)
+                on_release: root.process_response(user_input.text)  # Process the user's input
