@@ -150,7 +150,7 @@ class LoginScreen(Screen):
         global audio_playing
 
         if passwordCorrect:
-            playAudioPath = os.path.join('Sounds', "AuthenthicateConfirmJohn.mp3")
+            playAudioPath = os.path.join('Sounds', "AuthenthicateConfirm.mp3")
             Clock.schedule_once(lambda dt: self.change_to_assistant_screen())
         else:
             playAudioPath = os.path.join('Sounds', "AuthenthicateWrong.mp3")
@@ -178,59 +178,49 @@ class AssistantScreen(Screen):
     def log_off(self):
         self.manager.current = 'login'
 
-    def processText(self, text):
-        # Process the recognized text
-        print(f"Processing text: {text}")
-        # Example: Perform actions based on recognized text
-        if "balance" in text.lower():
-            self.playSound("What is my current balance")
-        elif "transfer" in text.lower():
-            self.playSound("Transfer Money")
-        else:
-            self.playSound("IncorrectInput")
-
     def optionSelect(self, text):
         global assistant_option
         global insideOption
         global assistant_option_state
+
         if insideOption == False:
-            if ("check current balance" in text.lower):
+            text_lower = text.lower()
+            if "balance" in text_lower:
                 assistant_option = "balance"
                 insideOption = True
-            elif "transfer money" in text.lower:
+            elif "transfer" in text_lower:
                 assistant_option = "transfer"
                 insideOption = True
-            elif "pay electric bill" in text.lower:
+            elif "pay" in text_lower:
                 assistant_option = "pay bill"
                 insideOption = True
-            elif "no thank you" in text.lower:
+            elif "no" in text_lower or "exit" in text_lower or "log off" in text_lower:
                 assistant_option = "logout"
                 insideOption = True
             else:
                 self.playSoundIncorrectInput()
             
-            print(f"Current assistant option: {assistant_option}")
+            print(f"Current assistant option: {assistant_option} with status of insideOption being: {insideOption}")
+
+        if assistant_option == "balance":
+            self.chainReadBalance()
+        elif assistant_option == "transfer":
+            self.chainTransfer()
+        elif assistant_option == "pay bill":
+            insideOption = False
+        elif assistant_option == "logout":
+            self.chainLogOut()
         else:
-            print(f"Insideoption: {insideOption}")
-            if assistant_option == "balance":
-                self.chainReadBalance()
-            elif assistant_option == "transfer":
-                self.chainTransfer()
-            elif assistant_option == "pay bill":
-                insideOption = False
-            elif assistant_option == "logout":
-                self.chainLogOut()
-            else:
-                insideOption = False
+            insideOption = False
             
-    def chainReadBalance(self, currentState):
+    def chainReadBalance(self):
         global insideOption
         global assistant_option_state
         print("inside chainReadBalance")
 
         assistant_option_state = 0
         insideOption = False
-        self.playSound ("balance")
+        self.playSoundFile("BalanceRead.mp3")
         
     
     def chainTransfer(self):
@@ -240,49 +230,57 @@ class AssistantScreen(Screen):
         global audio_playing
 
         print("inside chainTransfer")
-        match assistant_option_state:
-            case 0:
-                #Ask Name
-                if not audio_playing:
-                    # Darren Smith
-                    if "Darren" in recorded_text.lower():
-                        assistant_option_state = 1
-                    else:
-                        assistant_option_state = 5   
-                else:
-                    self.playSoundFile("TransferAccount.mp3")
-            case 1:
-                # Confirm Name
-                if not audio_playing:
-                    assistant_option_state = 2
-                else:
-                    self.playSoundFile("TransferDarrenSmith.mp3")
-            case 2:
-                # confirm amount
-                if not audio_playing:
-                    assistant_option_state = 3
-                else:
-                    self.playSoundFile("Pay10Dollars.mp3")
-            case 3:
-                # Payment Name
-                if not audio_playing:
-                    assistant_option_state = 4
-                else:
-                    self.playSoundFile("PaymentName.mp3")
-            case 4:
-                # Finished
-                if not audio_playing:
-                    assistant_option_state = 0
-                    insideOption = False
-                else:
-                    self.playSoundFile("PayTransfer.mp3")
 
-            case 5:
-                if not audio_playing:
-                    assistant_option_state = 0
-                    insideOption = False
-                else:
-                    self.playSoundFile("TransferNewAccount.mp3")
+        # Use a while loop to ensure it processes as expected
+        while True:
+            if not audio_playing:
+                match assistant_option_state:
+                    case 0:
+                        # Ask Name
+                        print("State 0: Ask Name")
+                        if "darren" in recorded_text.lower():
+                            assistant_option_state = 1
+                        else:
+                            assistant_option_state = 5   
+                    case 1:
+                        # Confirm Name
+                        print("State 1: Confirm Name")
+                        assistant_option_state = 2
+                    case 2:
+                        # Confirm Amount
+                        print("State 2: Confirm Amount")
+                        assistant_option_state = 3
+                    case 3:
+                        # Payment Name
+                        print("State 3: Payment Name")
+                        assistant_option_state = 4
+                    case 4:
+                        # Finished
+                        print("State 4: Finished")
+                        assistant_option_state = 0
+                        insideOption = False
+                        break  # Exit loop as the operation is finished
+                    case 5:
+                        # New Account
+                        print("State 5: New Account")
+                        assistant_option_state = 0
+                        insideOption = False
+                        break  # Exit loop as the operation is finished
+            else:
+                match assistant_option_state:
+                    case 0:
+                        self.playSoundFile("TransferAccount.mp3")
+                    case 1:
+                        self.playSoundFile("TransferDarrenSmith.mp3")
+                    case 2:
+                        self.playSoundFile("Pay10Dollars.mp3")
+                    case 3:
+                        self.playSoundFile("PaymentName.mp3")
+                    case 4:
+                        self.playSoundFile("PayTransfer.mp3")
+                    case 5:
+                        self.playSoundFile("TransferNewAccount.mp3")
+                break  # Exit loop to wait for audio to finish
     
     def chainLogOut(self):
         global insideOption
@@ -295,7 +293,7 @@ class AssistantScreen(Screen):
 
         Clock.schedule_once(lambda dt: self.change_to_login_screen())
         self.manager.current = 'login'
-        self.playSound ("goodbye")
+        self.playSoundFile ("goodbye.mp3")
 
     def change_to_login_screen(self):
         print("changing to login screen")
@@ -320,7 +318,7 @@ class AssistantScreen(Screen):
         global audio_playing
         # Construct the full path to the sound file
         sound_file = os.path.join('Sounds', "IncorrectInput.mp3")
-
+        print("Incorrect input for asssitant ")
         sound = SoundLoader.load(sound_file)
         if sound:
             audio_playing = True
