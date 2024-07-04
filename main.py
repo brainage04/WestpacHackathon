@@ -21,7 +21,9 @@ import wave
 #pip install PyAudio
 import pyaudio
 
-# Download GStreamer
+#pip install pydub
+from pydub import AudioSegment
+from pydub.utils import which
 
 Window.size = (360, 640)
 
@@ -70,11 +72,8 @@ def menuOptions(inputPrompt):
             return os.path.join('Sounds', "IncorrectInput.mp3")
 
 def continuous_recording():
-    # Function for continuous recording and processing
     global recorded_text
     global audio_playing
-    global recorder
-
     print("Recording started...")
     recognizer = sr.Recognizer()
     microphone = sr.Microphone()
@@ -86,19 +85,16 @@ def continuous_recording():
                 audio = recognizer.listen(source)
             
             try:
-                recorder.start()
-                with wave.open(os.path.join('Sounds'), 'w') as f:
-                    f.setparams((1, 2, 16000, 512, "NONE", "NONE"))
-                    f.writeframes(struct.pack("h" * len(audio), *audio))
-                while True:
-                    frame = recorder.read()
-                    audio.extend(frame)
-            except KeyboardInterrupt:
-                recorder.stop()
-            finally:
-                recorder.delete()
-    
-            try:
+                # Extract raw audio data
+                raw_audio = audio.get_raw_data()
+                waveFilePath = os.path.join('Sounds', 'recording.wav')
+                # Save the raw audio data to a wave file
+                with wave.open(waveFilePath, 'wb') as f:
+                    f.setnchannels(1)
+                    f.setsampwidth(audio.sample_width)
+                    f.setframerate(audio.sample_rate)
+                    f.writeframes(raw_audio)
+
                 text = recognizer.recognize_google(audio)
                 print("Recognized:", text)
                 recorded_text = text
@@ -114,6 +110,8 @@ def continuous_recording():
                 print("Could not understand audio")
             except sr.RequestError as e:
                 print("Could not request results; {0}".format(e))
+            except FileNotFoundError as e:
+                print(f"File not found error: {e}")
 
 class LoginScreen(Screen):
     def on_enter(self):
@@ -401,3 +399,5 @@ class MyApp(App):
 
 if __name__ == '__main__':
     MyApp().run()
+
+AudioSegment.converter = which("ffmpeg")
