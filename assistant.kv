@@ -1,6 +1,8 @@
 #:kivy 2.0.0
 
 <AssistantScreen>:
+    assistantText: assistantText
+    responseText: responseText
     BoxLayout:
         orientation: 'vertical'
         padding: dp(20)
@@ -27,10 +29,15 @@
                 size_hint: None, None
                 size: dp(250), dp(50)
                 pos_hint: {'center_x':1, 'center_y': 0.5}
-
-        Label:
-            text: 'Hello, how can I help you?'
+        Widget:
+            # Spacer
             size_hint_y: None
+            height: dp(50)
+    
+        
+        Label:
+            text: "Assistant:"
+            size_hint_y: 0.8
             height: dp(40)
             font_size: '20sp'
             color: 0.1216, 0.1098, 0.3098, 1
@@ -38,11 +45,57 @@
             text_size: self.width, None
             valign: 'middle'
             halign: 'left'
+        Widget:
+            # Spacer
+            size_hint_y: None
+            height: dp(10)
+        Label:
+            text: "<What the assistant said>"
+            id: assistantText
+            size_hint_y: 0.8
+            height: dp(40)
+            font_size: '15sp'
+            color: 0.1216, 0.1098, 0.3098, 1
+            size_hint_x: 1
+            text_size: self.width, None
+            valign: 'middle'
+            halign: 'left'
+        
+        Widget:
+            # Spacer
+            size_hint_y: None
+            height: dp(50)
+
+        Label:
+            text: 'Your response:'
+            size_hint_y: 0.8
+            height: dp(40)
+            font_size: '20sp'
+            color: 0.1216, 0.1098, 0.3098, 1
+            size_hint_x: 1
+            text_size: self.width, None
+            valign: 'middle'
+            halign: 'right'
+        Widget:
+            # Spacer
+            size_hint_y: None
+            height: dp(10)
+        Label:
+            text: '...'
+            id: responseText
+            size_hint_y: 0.8
+            height: dp(40)
+            font_size: '15sp'
+            color: 0.1216, 0.1098, 0.3098, 1
+            size_hint_x: 1
+            text_size: self.width, None
+            valign: 'middle'
+            halign: 'right'
 
         Widget:
             # Spacer to add space between the label and text input area
             size_hint_y: None
-            height: dp(400)
+            height: dp(300)
 
         BoxLayout:
             orientation: 'horizontal'
@@ -52,12 +105,12 @@
                 id: user_input
                 hint_text: 'Type your message here...'
                 size_hint_x: None
-                width: dp(300)
+                width: dp(230)
                 multiline: False
 
             Button:
                 text: 'Send'
                 background_color: 0.8549, 0.0902, 0.0627, 1  # Red color
                 size_hint_x: None
-                width: dp(100)
+                width: dp(80)
                 on_release: root.process_response(user_input.text)  # Process the user's input

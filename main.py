@@ -8,8 +8,10 @@ from kivy.core.audio import SoundLoader
 import threading
 import speech_recognition as sr
 from kivy.clock import Clock
-
-
+from kivy.properties import ObjectProperty
+from kivy.uix.label import Label
+from kivy.uix.widget import Widget
+from kivy.graphics import Color, Rectangle
 import struct
 
 #pip3 install pvrecorder
@@ -88,12 +90,15 @@ def continuous_recording():
         current_screen = app.root.current
         assistant_screen = app.assistant_screen
         if current_screen == 'assistant' and assistant_screen:
+            assistant_screen.assistantText.text = (f"{playTransferText()}")
             playTransferSounds()
             
         if not audio_playing:
             with microphone as source:
                 print("Listening...")
                 audio = recognizer.listen(source)
+                assistant_screen.assistantText.text = "<The assistant is currently listening>"
+                assistant_screen.responseText.text = "<You are currently speaking>"
             
             try:
                 # Extract raw audio data
@@ -108,19 +113,27 @@ def continuous_recording():
 
                 text = recognizer.recognize_google(audio)
                 print("Recognized:", text)
+                assistant_screen.responseText.text = (f"Your response: {text}")
                 recorded_text = text
                 
                 login_screen = app.login_screen
                 if current_screen == 'assistant' and assistant_screen:
+                    if insideOption == False:
+                        text_lower = text.lower()
+                        if not ("balance" in text_lower) and not ("pay" in text_lower) and not ("no" in text_lower or "exit" in text_lower or "log off" in text_lower):
+                            assistant_screen.assistantText.Text = "I'm sorry, I don't understand"
                     assistant_screen.optionSelect(text)  # Call method on AssistantScreen instance
                 elif current_screen == 'login' and login_screen:
                     login_screen.checkPassword(text)  # Call method on LoginScreen instance
             except sr.UnknownValueError:
                 print("Could not understand audio")
+                assistant_screen.responseText.text = "<...>"
             except sr.RequestError as e:
                 print("Could not request results; {0}".format(e))
+                assistant_screen.responseText.text = "<...>"
             except FileNotFoundError as e:
                 print(f"File not found error: {e}")
+                assistant_screen.responseText.text = "<...>"
 
 class LoginScreen(Screen):
     def on_enter(self):
@@ -184,6 +197,9 @@ class LoginScreen(Screen):
 
 
 class AssistantScreen(Screen):
+    assistantText = ObjectProperty(None)
+    responseText = ObjectProperty(None)
+
     def log_off(self):
         self.manager.current = 'login'
 
@@ -193,7 +209,6 @@ class AssistantScreen(Screen):
         global assistant_option_state
         global assistanceFirstTime
         global assistantMenuOpen
-
         if insideOption == False:
             text_lower = text.lower()
             if "balance" in text_lower:
@@ -410,6 +425,38 @@ def playTransferSounds():
                 case 6:
                     playSoundFile("TransferNewAccount.mp3")
         playTwice = playTwice + 1
+
+def playTransferText():
+    global insideOption
+    global assistant_option
+    global assistant_option_state
+    global playTwice
+    global assistanceFirstTime
+    global assistantMenuOpen
+    if not insideOption and assistantMenuOpen:
+        if assistanceFirstTime:
+            return "Your identity has been confirmed. Hello, John. How can I assist you today?"
+        else:
+            return "Is there anything else you would like assistance with?"
+    if (playTwice == 0 and assistant_option == "transfer"):
+        print("PlayTransferSound")
+        match assistant_option_state:
+                case 0:
+                    return "Sure, who would you like to transfer the money to?"
+                case 1:
+                    return "You want to transfer to Darren Smith, is this correct?"
+                case 2:
+                    return "Okay, how much do you want to transfer?"
+                case 3:
+                    return "10 dollars, is this correct?"
+                case 4:
+                    return "Okay, what would you like to name this payment?"
+                case 5:
+                    return "Okay, transferring the payment"
+                case 6:
+                    return "I'm sorry, as this is a new account, you will have to contact the bank."
+    else:
+        return "Hello, Thomas. How can I assist you today?"
 
 def playSoundFile(soundFileName):
         global audio_playing
