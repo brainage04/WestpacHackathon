@@ -15,6 +15,8 @@ Window.size = (360, 640)
 
 recorded_text = ""
 audio_playing = True
+assistant_option = "First"
+assistant_option_state = 0
 
 # Load the Kv files
 Builder.load_file('login.kv')
