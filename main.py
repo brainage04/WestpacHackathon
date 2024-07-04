@@ -73,7 +73,8 @@ def menuOptions(inputPrompt):
     # Define menu options based on input prompt
     app = MyApp.get_running_app()
     assistant_screen = app.assistant_screen
-    
+    textToDisplay = playTransferText()
+    assistant_screen.assistantText.text = (f"{textToDisplay}")
     match inputPrompt:
         case "balance":
             return os.path.join('Sounds', "BalanceRead.mp3")
@@ -134,21 +135,17 @@ def continuous_recording():
 
                 text = recognizer.recognize_google(audio)
                 print("Recognized:", text)
-                if (not typingSubmit):
-                    useTextFunction(text)
+                useTextFunction(text)
                 
             except sr.UnknownValueError:
                 print("Could not understand audio")
-                if (not typingSubmit):
-                    assistant_screen.responseText.text = "<...>"
+                assistant_screen.responseText.text = "<...>"
             except sr.RequestError as e:
                 print("Could not request results; {0}".format(e))
-                if (not typingSubmit):
-                    assistant_screen.responseText.text = "<...>"
+                assistant_screen.responseText.text = "<...>"
             except FileNotFoundError as e:
                 print(f"File not found error: {e}")
-                if (not typingSubmit):
-                    assistant_screen.responseText.text = "<...>"
+                assistant_screen.responseText.text = "<...>"
         
         
 
@@ -180,6 +177,9 @@ def useTextFunction(text):
     audioTimeOut = 90
 
 class LoginScreen(Screen):
+    global assistanceFirstTime
+    assistanceFirstTime = True
+    
     def on_enter(self):
         self.playSoundGreeting()
 
@@ -269,7 +269,9 @@ class AssistantScreen(Screen):
         typingSubmit = False
         app = MyApp.get_running_app()
         assistant_screen = app.assistant_screen
+        
         if insideOption == False:
+            print("Changing option")
             text_lower = text.lower()
             if "balance" in text_lower:
                 assistant_option = "balance"
@@ -284,42 +286,66 @@ class AssistantScreen(Screen):
                 assistant_option = "logout"
                 insideOption = True
             else:
-                self.playSoundFile("IncorrectInput.mp3")
-                assistant_screen.assistantText.Text = "I'm sorry, I don't understand"
-                assistantMenuOpen = True
+                assistant_option = "wrong"
+                insideOption = True
                 
             
             print(f"Current assistant option: {assistant_option} with status of insideOption being: {insideOption}")
+            assistant_screen.optionSelect(text)
+
         else:
+            
             if assistant_option == "balance":
                 self.chainReadBalance()
             elif assistant_option == "transfer":
-                self.chainTransfer()
+                print (f"Given Text: {text}")
+                self.chainTransfer(text)
             elif assistant_option == "pay bill":
                 insideOption = False
             elif assistant_option == "logout":
                 self.chainLogOut()
+            elif assistant_option == "wrong":
+                self.chainIncorrectInput()
             else:
                 insideOption = False
                 assistanceFirstTime = True
-                
-    def chainReadBalance(self):
+    
+    def chainIncorrectInput(self):
         app = MyApp.get_running_app()
         assistant_screen = app.assistant_screen
         global insideOption
         global assistant_option_state
         global assistantMenuOpen
+        self.playSoundFileIncorrect("IncorrectInput.mp3")
+        assistant_screen.assistantText.text = "I'm sorry, I don't understand"
+        assistant_option_state = 0
+
+
+    def chainReadBalance(self):
+        
+        app = MyApp.get_running_app()
+        assistant_screen = app.assistant_screen
+        global insideOption
+        global assistant_option_state
+        global assistantMenuOpen
+        
         print("inside chainReadBalance")
 
         assistant_option_state = 0
         insideOption = False
+        assistantMenuOpen = False
+        print("inside chainReadBalance")
+
         self.playSoundFile("BalanceRead.mp3")
         assistant_screen.assistantText.text = "Sure, you currently have $1234 in your account"
-        assistantMenuOpen = True
+        
+
+        print(f"insideOption: {insideOption} assistantMenuOpen: {assistantMenuOpen}")
+        print(f"Checking if menu start can be played: {(insideOption == False) and assistantMenuOpen}")
         
         
     
-    def chainTransfer(self):
+    def chainTransfer(self, text):
         global insideOption
         global assistant_option_state
         global recorded_text
@@ -335,11 +361,12 @@ class AssistantScreen(Screen):
                     # Ask Name
                     print("State 0: Ask Name")
                     print(f"given text in state 0: {recorded_text.lower()}")
-                    if ("darren" in recorded_text.lower() or "aaron" in recorded_text.lower()) and playTwice == 1:
+                    if (("darren" in text.lower() or "aaron" in text.lower()) or "aaron" in text.lower() or "Darren" in text.lower() or "baron" in text.lower()) and playTwice == 1:
                         print("Change state to 1")
                         playTwice = 0
                         assistant_option_state = 1
                     elif playTwice == 1:
+                        print(f"given text is: {text}")
                         print("Change state to 5")
                         assistant_option_state = 6
                         playTwice = 0   
@@ -376,6 +403,7 @@ class AssistantScreen(Screen):
                     playTwice = 0
                     assistantMenuOpen = True
                     
+                    
                 case 6:
                     # New Account
                     print("State 6: New Account/ Unrecognised Name")
@@ -394,13 +422,15 @@ class AssistantScreen(Screen):
         assistant_screen = app.assistant_screen
         global insideOption
         global assistant_option_state
+        global assistantMenuOpen
         assistant_option_state = 0
         insideOption = False
-
+        
         print("inside chainLogOut")
 
         Clock.schedule_once(lambda dt: self.change_to_login_screen())
         self.manager.current = 'login'
+        assistantMenuOpen = False
         self.playSoundFile ("goodbye.mp3")
         assistant_screen.assistantText.text = "Thank you, have a nice day."
         
@@ -458,10 +488,55 @@ class AssistantScreen(Screen):
         else:
             print("Sound file not found or could not be loaded")
 
-    def audioPlayingFalse(self, _):
+    
+    
+    def playSoundFileIncorrect(self, soundFileName):
+        global audio_playing
+        global assistantMenuOpen
+        global insideOption
+        # Construct the full path to the sound file
+        sound_file = os.path.join('Sounds', soundFileName)
+
+        sound = SoundLoader.load(sound_file)
+        if sound:
+            audio_playing = True
+            sound.bind(on_stop=self.audioPlayingFalse)
+            print("Sound found at %s" % sound.source)
+            print("Sound is %.3f seconds" % sound.length)
+            sound.play()
+        else:
+            print("Sound file not found or could not be loaded")
+        
+        
+
+    def audioPlayingFalseIncorrect(self, _):
         global audio_playing
         audio_playing = False
+        global assistantMenuOpen
+        global insideOption
+        global assistanceFirstTime
         print("Sound finished playing and audio_playing is: ", audio_playing)
+        assistantMenuOpen = True
+        insideOption = False
+        playSoundFile("AdditionalAssistance.mp3")
+        assistanceFirstTime = True
+
+
+
+    def audioPlayingFalse(self, _):
+        global audio_playing
+        global insideOption
+        global assistant_option_state
+        global assistanceFirstTime
+        assistant_option_state = 0
+        insideOption = False
+        audio_playing = False
+        print("Sound finished playing and audio_playing is: ", audio_playing)
+        assistanceFirstTime = False
+        if insideOption == False:
+            assistantMenuOpen = True
+        else:
+            assistantMenuOpen = False
         
 def playTransferSounds():
     global insideOption
@@ -470,13 +545,11 @@ def playTransferSounds():
     global playTwice
     global assistanceFirstTime
     global assistantMenuOpen
-    if not insideOption and assistantMenuOpen:
-        if assistanceFirstTime:
-            print("Played Assistance First Time")
-            assistantMenuOpen = False
-        else:
+    if (not insideOption) and assistantMenuOpen:
+        if not assistanceFirstTime and not insideOption:
             print("Played Assistance Other Time")
             playSoundFile("AdditionalAssistance.mp3")
+            
             assistantMenuOpen = False
     if (playTwice == 0 and assistant_option == "transfer"):
         match assistant_option_state:
@@ -503,14 +576,13 @@ def playTransferText():
     global playTwice
     global assistanceFirstTime
     global assistantMenuOpen
-    
-    
+
     if not insideOption and assistantMenuOpen:
         if assistanceFirstTime:
             return "Your identity has been confirmed. Hello, Thomas. How can I assist you today?"
         else:
             return "Is there anything else you would like assistance with?"
-    if (playTwice == 1 and assistant_option == "transfer"):
+    elif (playTwice == 1 and assistant_option == "transfer"):
         match assistant_option_state:
                 case 0:
                     return "Sure, who would you like to transfer the money to?"
@@ -526,6 +598,10 @@ def playTransferText():
                     return "Okay, transferring the payment"
                 case 6:
                     return "I'm sorry, as this is a new account, you will have to contact the bank."
+    elif(assistant_option == "balance"):
+        return "Sure, you currently have $1234 in your account."
+
+    
     else:
         return "Hello, Thomas. How can I assist you today?"
 
