@@ -42,6 +42,7 @@ assistantMenuOpen = True
 assistanceFirstTime = True
 audioTimeOut = 90
 typingSubmit = False
+additionalAssistancePlayed = False
 
 # Load the Kv files
 Builder.load_file('login.kv')
@@ -73,8 +74,10 @@ def menuOptions(inputPrompt):
     # Define menu options based on input prompt
     app = MyApp.get_running_app()
     assistant_screen = app.assistant_screen
-    textToDisplay = playTransferText()
-    assistant_screen.assistantText.text = (f"{textToDisplay}")
+    if not additionalAssistancePlayed:
+        textToDisplay = playTransferText()
+        print("Update additionalAssistance")
+        assistant_screen.assistantText.text = (f"{textToDisplay}")
     match inputPrompt:
         case "balance":
             return os.path.join('Sounds', "BalanceRead.mp3")
@@ -110,8 +113,9 @@ def continuous_recording():
         app = MyApp.get_running_app()
         current_screen = app.root.current
         assistant_screen = app.assistant_screen
-        textToDisplay = playTransferText()
-        assistant_screen.assistantText.text = (f"{textToDisplay}")
+        if not additionalAssistancePlayed:
+            textToDisplay = playTransferText()
+            assistant_screen.assistantText.text = (f"{textToDisplay}")
         if current_screen == 'assistant' and assistant_screen:
             playTransferSounds()
 
@@ -528,15 +532,33 @@ class AssistantScreen(Screen):
         global insideOption
         global assistant_option_state
         global assistanceFirstTime
+        global assistantMenuOpen
+        global additionalAssistancePlayed
         assistant_option_state = 0
         insideOption = False
-        audio_playing = False
+        
+
+        app = MyApp.get_running_app()
+        assistant_screen = app.assistant_screen
+        
+        
         print("Sound finished playing and audio_playing is: ", audio_playing)
         assistanceFirstTime = False
         if insideOption == False:
             assistantMenuOpen = True
+            audio_playing = True
+            if not additionalAssistancePlayed:
+                
+                print("Additional Assistance")
+                additionalAssistancePlayed = True
+                
+            else:
+                assistant_screen.assistantText.text = ("Is there anything else you would like assistance with?")
+                additionalAssistancePlayed = False
+
         else:
             assistantMenuOpen = False
+        audio_playing = False
         
 def playTransferSounds():
     global insideOption
@@ -609,7 +631,6 @@ def playSoundFile(soundFileName):
         global audio_playing
         # Construct the full path to the sound file
         sound_file = os.path.join('Sounds', soundFileName)
-
         sound = SoundLoader.load(sound_file)
         if sound:
             audio_playing = True
