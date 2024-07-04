@@ -12,62 +12,74 @@
                 pos: self.pos
                 size: self.size
 
-        Image:
-            source: 'WBCLogo_red.png'  # Logo
-            size_hint: None, None
-            size: dp(300), dp(100)  # Adjust size as needed
-            pos_hint: {'center_x': 0.5}
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: dp(60)
+
+            Button:
+                text: '< Back'
+                size_hint_x: None
+                width: dp(100)
+                on_release: app.root.current = 'login'  # Navigate back to the login screen
+
+            Widget:  # Spacer to push the logo to the right
+                size_hint_x: None
+                width: dp(300)
+
+            Image:
+                source: 'WBCLogo_red.png'
+                size_hint: None, None
+                size: dp(250), dp(50)
+                pos_hint: {'center_x': 0.5}
 
         Label:
             text: 'Hello, how can I help you?'
             size_hint_y: None
-            height: dp(50)
+            height: dp(40)
             font_size: '20sp'
-            color: 0.1216, 0.1098, 0.3098, 1  # Dark blue text
+            color: 0.1216, 0.1098, 0.3098, 1
+            text_size: self.width, None
+            halign: 'left'
 
-        Label:
-            id: display_recording
-            hint_text: 'Displayed recording text here'
+        BoxLayout:
+            orientation: 'horizontal'
             size_hint_y: None
             height: dp(50)
-            readonly: True
-            background_color: (1, 1, 1, 0.5)  # Semi-transparent white for readonly field
-            foreground_color: (0, 0, 0, 1)  # Black text
 
-       
-        Button:
-            text: 'My Savings account is...'
+            Label:  # Readonly display area for the response
+                id: display_recording
+                text: ''
+                size_hint_x: None
+                width: dp(350)  # Set width for alignment
+                background_color: (1, 1, 1, 0.5)
+                color: (0, 0, 0, 1)
+                text_size: self.width, None
+                halign: 'right'  # Align text to the right
+
+            Label:  # Assistant response
+                id: assistant_response
+                text: ''
+                size_hint_x: None
+                width: dp(350)  # Set width for alignment
+                background_color: (1, 1, 1, 0.5)
+                color: (0, 0, 0, 1)
+                text_size: self.width, None
+                halign: 'left'  # Align text to the left
+
+        BoxLayout:
+            orientation: 'horizontal'
             size_hint_y: None
             height: dp(50)
-            background_normal: ''
-            background_color: 0.8549, 0.0902, 0.0627, 1  # Red color for buttons
-            color: 1, 1, 1, 1  # White text
-            on_release: root.start_recording()
 
-        Button:
-            text: 'My account balance is'
-            size_hint_y: None
-            height: dp(50)
-            background_normal: ''
-            background_color: 0.8549, 0.0902, 0.0627, 1  # Red color for buttons
-            color: 1, 1, 1, 1  # White text
-            on_release: root.stop_recording()
+            TextInput:
+                id: user_input
+                hint_text: 'Type your message here...'
+                size_hint_x: None
+                width: dp(350)
+                multiline: False
 
-        Button:
-            text: 'Transfer to ...'
-            size_hint_y: None
-            height: dp(50)
-            background_normal: ''
-            background_color: 0.8549, 0.0902, 0.0627, 1  # Red color for buttons
-            color: 1, 1, 1, 1  # White text
-            on_release: root.start_recording()
-
-        Button:
-            text: 'Your expenses are predicted to be ...'
-            size_hint_y: None
-            height: dp(50)
-            background_normal: ''
-            background_color: 0.8549, 0.0902, 0.0627, 1  # Red color for buttons
-            color: 1, 1, 1, 1  # White text
-            on_release: root.start_recording()
-
+            Button:
+                text: 'Send'
+                background_color: 0.8549, 0.0902, 0.0627, 1  # Red color
+                on_release: root.process_response(user_input.text)  # Process the user's input instead of the recording's text
