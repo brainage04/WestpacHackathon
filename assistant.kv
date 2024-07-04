@@ -7,68 +7,56 @@
         spacing: dp(20)
         canvas.before:
             Color:
-                rgba: 243/255, 244/255, 246/255, 1  # Background color
+                rgba: 0.9529, 0.9569, 0.9647, 1  # Light grey background
             Rectangle:
                 pos: self.pos
                 size: self.size
 
         Image:
-            source: 'WBCLogo.png'
+            source: 'WBCLogo_red.png'  # Logo
             size_hint: None, None
-            size: dp(150), dp(50)
+            size: dp(300), dp(100)  # Adjust size as needed
             pos_hint: {'center_x': 0.5}
 
         Label:
-            text: 'Welcome to the Assistant'
-            font_size: '24sp'
-            font_name: 'Roboto-Bold'  # Ensure you have Roboto-Bold.ttf
-            color: 31/255, 28/255, 79/255, 1  # Heading color
+            text: 'Assistant Screen'
             size_hint_y: None
-            height: self.texture_size[1]
+            height: dp(50)
+            font_size: '20sp'
+            color: 0.1216, 0.1098, 0.3098, 1  # Dark blue text
 
-        BoxLayout:
-            orientation: 'horizontal'
-            spacing: dp(10)
-
-            Button:
-                text: 'Action 1'
-                size_hint_y: None
-                height: dp(50)
-                font_size: '18sp'
-                font_name: 'Roboto-Bold'  # Ensure you have Roboto-Bold.ttf
-                background_normal: ''
-                background_color: 218/255, 23/255, 16/255, 1  # Primary color
-                color: 1, 1, 1, 1  # White text color
-                on_release: app.perform_action_1()
-
-            Button:
-                text: 'Action 2'
-                size_hint_y: None
-                height: dp(50)
-                font_size: '18sp'
-                font_name: 'Roboto-Bold'  # Ensure you have Roboto-Bold.ttf
-                background_normal: ''
-                background_color: 218/255, 23/255, 16/255, 1  # Primary color
-                color: 1, 1, 1, 1  # White text color
-                on_release: app.perform_action_2()
-
-        Widget:  # Spacer
+        TextInput:
+            id: display_recording
+            hint_text: 'Displayed recording text here'
             size_hint_y: None
-            height: dp(20)
+            height: dp(50)
+            readonly: True
+            background_color: (1, 1, 1, 0.5)  # Semi-transparent white for readonly field
+            foreground_color: (0, 0, 0, 1)  # Black text
 
-        BoxLayout:
-            orientation: 'horizontal'
+        TextInput:
+            id: record_input
+            hint_text: 'Enter recording commands here'
             size_hint_y: None
-            height: dp(80)
-            padding: dp(10)
+            height: dp(50)
+            multiline: False
+            background_color: (1, 1, 1, 1)  # White background for input
+            foreground_color: (0, 0, 0, 1)  # Black text
 
-            Button:
-                text: 'Log Off'
-                size_hint_x: None
-                width: dp(80)
-                font_size: '14sp'
-                font_name: 'Roboto-Bold'
-                background_normal: ''
-                background_color: 218/255, 23/255, 16/255, 1  # Primary color
-                color: 1, 1, 1, 1  # White text color
-                on_release: root.log_off()
+        Button:
+            text: 'Start Recording'
+            size_hint_y: None
+            height: dp(50)
+            background_normal: ''
+            background_color: 0.8549, 0.0902, 0.0627, 1  # Red color for buttons
+            color: 1, 1, 1, 1  # White text
+            on_release: root.start_recording()
+
+        Button:
+            text: 'Stop Recording'
+            size_hint_y: None
+            height: dp(50)
+            background_normal: ''
+            background_color: 0.8549, 0.0902, 0.0627, 1  # Red color for buttons
+            color: 1, 1, 1, 1  # White text
+            on_release: root.stop_recording()
