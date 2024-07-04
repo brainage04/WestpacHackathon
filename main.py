@@ -91,8 +91,9 @@ def continuous_recording():
         app = MyApp.get_running_app()
         current_screen = app.root.current
         assistant_screen = app.assistant_screen
+        textToDisplay = playTransferText()
+        assistant_screen.assistantText.text = (f"{textToDisplay}")
         if current_screen == 'assistant' and assistant_screen:
-            assistant_screen.assistantText.text = (f"{playTransferText()}")
             playTransferSounds()
             
         if not audio_playing:
@@ -115,7 +116,11 @@ def continuous_recording():
 
                 text = recognizer.recognize_google(audio)
                 print("Recognized:", text)
-                assistant_screen.responseText.text = (f"Your response: {text}")
+                
+                if not (text == "password"):
+                    assistant_screen.responseText.text = (f"{text}")
+                else:
+                    assistant_screen.responseText.text = (f"...")
                 recorded_text = text
                 
                 login_screen = app.login_screen
@@ -435,12 +440,14 @@ def playTransferText():
     global playTwice
     global assistanceFirstTime
     global assistantMenuOpen
+    
+    
     if not insideOption and assistantMenuOpen:
         if assistanceFirstTime:
-            return "Your identity has been confirmed. Hello, John. How can I assist you today?"
+            return "Your identity has been confirmed. Hello, Thomas. How can I assist you today?"
         else:
             return "Is there anything else you would like assistance with?"
-    if (playTwice == 0 and assistant_option == "transfer"):
+    if (playTwice == 1 and assistant_option == "transfer"):
         print("PlayTransferSound")
         match assistant_option_state:
                 case 0:
@@ -450,7 +457,7 @@ def playTransferText():
                 case 2:
                     return "Okay, how much do you want to transfer?"
                 case 3:
-                    return "10 dollars, is this correct?"
+                    return "$10, is this correct?"
                 case 4:
                     return "Okay, what would you like to name this payment?"
                 case 5:
