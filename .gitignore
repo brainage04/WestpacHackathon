@@ -164,5 +164,6 @@ cython_debug/
 
 # other
 westpac_hackathon/
-16000_pcm_speeches
+16000_pcm_speeches/
+16000_pcm_speeches_MODIFIED/
 archive.zip
