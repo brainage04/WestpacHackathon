@@ -23,4 +23,4 @@ Don't worry about warnings from the Tensorflow package. They are just warnings. 
 # Todo
 
 Modify machine learning model to use contrastive loss function
-Modify dataset to have 5 second samples instead of 1
+Test own voice samples on modified model
