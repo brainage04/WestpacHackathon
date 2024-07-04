@@ -40,10 +40,14 @@ playTwice = 0
 assistantMenuOpen = True
 
 assistanceFirstTime = True
+audioTimeOut = 90
+typingSubmit = False
 
 # Load the Kv files
 Builder.load_file('login.kv')
 Builder.load_file('assistant.kv')
+
+
 
 def playSound(voiceInput):
     # Construct the full path to the sound file based on voice input
@@ -67,6 +71,9 @@ def audioPlayingFalse(self, _):
 
 def menuOptions(inputPrompt):
     # Define menu options based on input prompt
+    app = MyApp.get_running_app()
+    assistant_screen = app.assistant_screen
+    
     match inputPrompt:
         case "balance":
             return os.path.join('Sounds', "BalanceRead.mp3")
@@ -75,13 +82,24 @@ def menuOptions(inputPrompt):
         case "Pay electric bill":
             return os.path.join('Sounds', "PayElectricBill.mp3")
         case "goodbye":
+            assistant_screen.assistantText.text = "Thank you, have a nice day."
             return os.path.join('Sounds', "Goodbye.mp3")
         case _:
             return os.path.join('Sounds', "IncorrectInput.mp3")
 
+
+
+def waitingTyping():
+    global typingSubmit
+    audioTimeOut = 0
+    while (typingSubmit):
+        text = recorded_text
+        useTextFunction(text)
+
 def continuous_recording():
     global recorded_text
     global audio_playing
+    
     print("Recording started...")
     recognizer = sr.Recognizer()
     microphone = sr.Microphone()
@@ -95,14 +113,14 @@ def continuous_recording():
         assistant_screen.assistantText.text = (f"{textToDisplay}")
         if current_screen == 'assistant' and assistant_screen:
             playTransferSounds()
-            
-        if not audio_playing:
+
+        if not audio_playing and not typingSubmit:
             with microphone as source:
                 print("Listening...")
                 audio = recognizer.listen(source)
-                assistant_screen.assistantText.text = "<The assistant is currently listening>"
-                assistant_screen.responseText.text = "<You are currently speaking>"
-            
+                if (not typingSubmit):
+                    assistant_screen.assistantText.text = "<The assistant is currently listening>"
+                    assistant_screen.responseText.text = "<You are currently speaking>"
             try:
                 # Extract raw audio data
                 raw_audio = audio.get_raw_data()
@@ -116,31 +134,50 @@ def continuous_recording():
 
                 text = recognizer.recognize_google(audio)
                 print("Recognized:", text)
+                if (not typingSubmit):
+                    useTextFunction(text)
                 
-                if not (text == "password"):
-                    assistant_screen.responseText.text = (f"{text}")
-                else:
-                    assistant_screen.responseText.text = (f"...")
-                recorded_text = text
-                
-                login_screen = app.login_screen
-                if current_screen == 'assistant' and assistant_screen:
-                    if insideOption == False:
-                        text_lower = text.lower()
-                        if not ("balance" in text_lower) and not ("pay" in text_lower) and not ("no" in text_lower or "exit" in text_lower or "log off" in text_lower):
-                            assistant_screen.assistantText.Text = "I'm sorry, I don't understand"
-                    assistant_screen.optionSelect(text)  # Call method on AssistantScreen instance
-                elif current_screen == 'login' and login_screen:
-                    login_screen.checkPassword(text)  # Call method on LoginScreen instance
             except sr.UnknownValueError:
                 print("Could not understand audio")
-                assistant_screen.responseText.text = "<...>"
+                if (not typingSubmit):
+                    assistant_screen.responseText.text = "<...>"
             except sr.RequestError as e:
                 print("Could not request results; {0}".format(e))
-                assistant_screen.responseText.text = "<...>"
+                if (not typingSubmit):
+                    assistant_screen.responseText.text = "<...>"
             except FileNotFoundError as e:
                 print(f"File not found error: {e}")
-                assistant_screen.responseText.text = "<...>"
+                if (not typingSubmit):
+                    assistant_screen.responseText.text = "<...>"
+        
+        
+
+
+
+
+def useTextFunction(text):
+    global typingSubmit
+    global audioTimeOut
+    print ("useTextFunction")
+    app = MyApp.get_running_app()
+    current_screen = app.root.current
+    assistant_screen = app.assistant_screen
+    if not (text == "password"):
+        assistant_screen.responseText.text = (f"{text}")
+    else:
+        assistant_screen.responseText.text = (f"...")
+    recorded_text = text
+    
+    login_screen = app.login_screen
+    if current_screen == 'assistant' and assistant_screen:
+        if insideOption == False:
+            text_lower = text.lower()
+            if not ("balance" in text_lower) and not ("pay" in text_lower) and not ("no" in text_lower or "exit" in text_lower or "log off" in text_lower):
+                assistant_screen.assistantText.text = "I'm sorry, I don't understand"
+        assistant_screen.optionSelect(text)  # Call method on AssistantScreen instance
+    elif current_screen == 'login' and login_screen:
+        login_screen.checkPassword(text)  # Call method on LoginScreen instance
+    audioTimeOut = 90
 
 class LoginScreen(Screen):
     def on_enter(self):
@@ -207,6 +244,17 @@ class AssistantScreen(Screen):
     assistantText = ObjectProperty(None)
     responseText = ObjectProperty(None)
 
+    def submitTextInput(self):
+        global recorded_text
+        global typingSubmit
+        app = MyApp.get_running_app()
+        assistant_screen = app.assistant_screen
+        recorded_text = assistant_screen.user_input.text
+        print (f"Submitted text: {assistant_screen.user_input.text}")
+        assistant_screen.user_input.text = ""
+        typingSubmit = True
+        waitingTyping()
+
     def log_off(self):
         self.manager.current = 'login'
 
@@ -216,6 +264,11 @@ class AssistantScreen(Screen):
         global assistant_option_state
         global assistanceFirstTime
         global assistantMenuOpen
+        global typingSubmit
+        print ("Inside optionSelect")
+        typingSubmit = False
+        app = MyApp.get_running_app()
+        assistant_screen = app.assistant_screen
         if insideOption == False:
             text_lower = text.lower()
             if "balance" in text_lower:
@@ -232,6 +285,7 @@ class AssistantScreen(Screen):
                 insideOption = True
             else:
                 self.playSoundFile("IncorrectInput.mp3")
+                assistant_screen.assistantText.Text = "I'm sorry, I don't understand"
                 assistantMenuOpen = True
                 
             
@@ -250,6 +304,8 @@ class AssistantScreen(Screen):
                 assistanceFirstTime = True
                 
     def chainReadBalance(self):
+        app = MyApp.get_running_app()
+        assistant_screen = app.assistant_screen
         global insideOption
         global assistant_option_state
         global assistantMenuOpen
@@ -258,6 +314,7 @@ class AssistantScreen(Screen):
         assistant_option_state = 0
         insideOption = False
         self.playSoundFile("BalanceRead.mp3")
+        assistant_screen.assistantText.text = "Sure, you currently have $1234 in your account"
         assistantMenuOpen = True
         
         
@@ -333,6 +390,8 @@ class AssistantScreen(Screen):
 
     
     def chainLogOut(self):
+        app = MyApp.get_running_app()
+        assistant_screen = app.assistant_screen
         global insideOption
         global assistant_option_state
         assistant_option_state = 0
@@ -343,6 +402,7 @@ class AssistantScreen(Screen):
         Clock.schedule_once(lambda dt: self.change_to_login_screen())
         self.manager.current = 'login'
         self.playSoundFile ("goodbye.mp3")
+        assistant_screen.assistantText.text = "Thank you, have a nice day."
         
 
     def change_to_login_screen(self):
@@ -366,6 +426,9 @@ class AssistantScreen(Screen):
     
     def playSoundIncorrectInput(self):
         global audio_playing
+        app = MyApp.get_running_app()
+        assistant_screen = app.assistant_screen
+
         # Construct the full path to the sound file
         sound_file = os.path.join('Sounds', "IncorrectInput.mp3")
         print("Incorrect input for asssitant ")
@@ -373,6 +436,7 @@ class AssistantScreen(Screen):
         if sound:
             audio_playing = True
             sound.bind(on_stop=self.playSoundFile("AdditionalAssistance.mp3"))
+            assistant_screen.assistantText.text = "Is there anything else you would like assistance with?"
             print("Sound found at %s" % sound.source)
             print("Sound is %.3f seconds" % sound.length)
             sound.play()
@@ -415,7 +479,6 @@ def playTransferSounds():
             playSoundFile("AdditionalAssistance.mp3")
             assistantMenuOpen = False
     if (playTwice == 0 and assistant_option == "transfer"):
-        print("PlayTransferSound")
         match assistant_option_state:
                 case 0:
                     playSoundFile("TransferQuestion.mp3")
@@ -448,7 +511,6 @@ def playTransferText():
         else:
             return "Is there anything else you would like assistance with?"
     if (playTwice == 1 and assistant_option == "transfer"):
-        print("PlayTransferSound")
         match assistant_option_state:
                 case 0:
                     return "Sure, who would you like to transfer the money to?"
@@ -505,6 +567,7 @@ class MyApp(App):
         recording_thread.daemon = True  # Daemonize the thread to stop with the app
         recording_thread.start()
         
+        
         return sm
 
     def login(self, username, password):
@@ -525,6 +588,8 @@ class MyApp(App):
         # Implement logout logic
         print('Logging out')
         self.root.current = 'login'
+    
+    
     
     
     

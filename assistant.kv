@@ -3,6 +3,7 @@
 <AssistantScreen>:
     assistantText: assistantText
     responseText: responseText
+    user_input: user_input
     BoxLayout:
         orientation: 'vertical'
         padding: dp(20)
@@ -113,4 +114,4 @@
                 background_color: 0.8549, 0.0902, 0.0627, 1  # Red color
                 size_hint_x: None
                 width: dp(80)
-                on_release: root.process_response(user_input.text)  # Process the user's input
+                on_release: root.submitTextInput()  # Process the user's input
