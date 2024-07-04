@@ -18,7 +18,6 @@ audio_playing = True
 assistant_option = "start"
 assistant_option_state = 0
 insideOption = False
-waitingInput = False
 
 # Load the Kv files
 Builder.load_file('login.kv')
@@ -81,7 +80,7 @@ def continuous_recording():
                 assistant_screen = app.assistant_screen
                 login_screen = app.login_screen
                 if current_screen == 'assistant' and assistant_screen:
-                    assistant_screen.processText(text)  # Call method on AssistantScreen instance
+                    assistant_screen.optionSelect(text)  # Call method on AssistantScreen instance
                 elif current_screen == 'login' and login_screen:
                     login_screen.checkPassword(text)  # Call method on LoginScreen instance
             except sr.UnknownValueError:
@@ -184,11 +183,14 @@ class AssistantScreen(Screen):
                 insideOption = True
             else:
                 self.playSoundIncorrectInput()
+            
+            print(f"Current assistant option: {assistant_option}")
         else:
+            print(f"Insideoption: {insideOption}")
             if assistant_option == "balance":
                 self.chainReadBalance()
             elif assistant_option == "transfer":
-                insideOption = False
+                self.chainTransfer()
             elif assistant_option == "pay bill":
                 insideOption = False
             elif assistant_option == "logout":
@@ -199,18 +201,20 @@ class AssistantScreen(Screen):
     def chainReadBalance(self, currentState):
         global insideOption
         global assistant_option_state
-        
+        print("inside chainReadBalance")
+
         assistant_option_state = 0
         insideOption = False
         self.playSound ("balance")
+        
     
     def chainTransfer(self):
         global insideOption
         global assistant_option_state
         global recorded_text
-        global waitingInput
         global audio_playing
 
+        print("inside chainTransfer")
         match assistant_option_state:
             case 0:
                 #Ask Name
@@ -262,11 +266,14 @@ class AssistantScreen(Screen):
         assistant_option_state = 0
         insideOption = False
 
+        print("inside chainLogOut")
+
         Clock.schedule_once(lambda dt: self.change_to_login_screen())
         self.manager.current = 'login'
         self.playSound ("goodbye")
 
     def change_to_login_screen(self):
+        print("changing to login screen")
         self.manager.current = 'login'
 
     def playSound(self, voiceInput):
