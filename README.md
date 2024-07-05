@@ -8,7 +8,7 @@ Run the following commands:
 
 1. (optional) `python -m venv .venv` (creates a virtual environment for storing dependencies, important on Linux to avoid overwriting older Python packages with newer ones as this can break your operating system/desktop environment)
 2. (optional) Windows: `source .venv/Scripts/activate` | Linux: `source .venv/bin/activate` (activates the virtual environment so you can use and install dependencies)
-3. `python -m pip install "kivy[full]" kivy_examples SpeechRecognition tensorflow numpy IPython pvrecorder pydub` (this may take a while, it will download ~1GB worth of packages)
+3. `python -m pip install "kivy[full]" kivy_examples SpeechRecognition tensorflow numpy IPython pvrecorder pydub PyAudio` (this may take a while, it will download ~1GB worth of packages)
 
 Reload the window (`Ctrl + Shift + P` > `Developer: Reload Window`). Done!
 
