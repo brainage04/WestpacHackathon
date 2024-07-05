@@ -11,6 +11,8 @@ import keras
 from pathlib import Path
 from IPython.display import display, Audio
 
+import random
+
 ## Constants
 #DATASET_ROOT = "16000_pcm_speeches"
 DATASET_ROOT = "16000_pcm_speeches_MODIFIED"
@@ -47,15 +49,8 @@ EPOCHS = 5
 ## Generate Dataset
 def paths_and_labels_to_dataset(audio_paths, labels):
     """Constructs a dataset of audios and labels."""
-    path_ds = tf.data.Dataset.from_tensor_slices(audio_paths)
-    audio_ds = path_ds.map(
-        lambda x: path_to_audio(x), num_parallel_calls=tf.data.AUTOTUNE
-    )
-    label_ds = tf.data.Dataset.from_tensor_slices(labels)
-    return tf.data.Dataset.zip((audio_ds, label_ds))
-
-    images = numpy.zeros((2, len(audio_paths), SAMPLING_RATE // 2, 1))
-    label = numpy.zeros(len(audio_paths))
+    images = np.zeros((2, len(audio_paths), SAMPLING_RATE // 2, 1))
+    label = np.zeros(len(audio_paths))
     
     for i in range(len(audio_paths)):
         
@@ -77,7 +72,7 @@ def paths_and_labels_to_dataset(audio_paths, labels):
         images[1, i, :, :] = audio_to_fft(path_to_audio(audio_paths[idx2]))[:]
         label[i] = l
 
-    return [image_a, image_b], label
+    return images, label
 
 def path_to_audio(path):
     """Reads and decodes an audio file."""
@@ -97,7 +92,7 @@ def audio_to_fft(audio):
 
     # Return the absolute value of the first half of the FFT
     # which represents the positive frequencies
-    return tf.math.abs(fft[0:(audio.shape[1] // 2), :])
+    return tf.math.abs(fft[0:(SAMPLING_RATE // 2), :])
 
 # Get the list of audio file paths along with their corresponding labels
 class_names = os.listdir(DATASET_AUDIO_PATH)
@@ -147,6 +142,11 @@ valid_labels = labels[-num_val_samples:]
 # Create 2 datasets, one for training and the other for validation
 train_x, train_y = paths_and_labels_to_dataset(train_audio_paths, train_labels)
 val_x, val_y = paths_and_labels_to_dataset(valid_audio_paths, valid_labels)
+
+print(train_x.shape)
+print(train_y.shape)
+print(val_x.shape)
+print(val_y.shape)
 
 rng = np.random.RandomState(SHUFFLE_SEED)
 rng.shuffle(train_x)
@@ -254,11 +254,11 @@ mdlcheckpoint_cb = keras.callbacks.ModelCheckpoint(
 
 ## Train Model
 history = model.fit(
-    train_x,
+    [train_x[0], train_x[1]],
     train_y,
     epochs=EPOCHS,
     batch_size=BATCH_SIZE,
-    validation_data=(val_x, val_y),
+    validation_data=([val_x[0], val_x[1]], val_y),
     callbacks=[earlystopping_cb, mdlcheckpoint_cb],
 )
 
@@ -284,8 +284,8 @@ for audios, labels in test_ds.take(1):
     y_pred = model.predict(ffts)
     # Take random samples
     rnd = np.random.randint(0, BATCH_SIZE, SAMPLES_TO_DISPLAY)
-    audios = audios.numpy()[rnd, :, :]
-    labels = labels.numpy()[rnd]
+    audios = audios.np()[rnd, :, :]
+    labels = labels.np()[rnd]
     y_pred = np.argmax(y_pred, axis=-1)[rnd]
 
     for index in range(SAMPLES_TO_DISPLAY):
