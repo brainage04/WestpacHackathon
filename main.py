@@ -55,6 +55,7 @@ import tensorflow as tf
 
 SAMPLING_RATE = 80000 # 5 seconds long
 
+## Functions required to convert audio paths to np.array data
 def path_to_audio(path):
     """Reads and decodes an audio file."""
     audio = tf.io.read_file(path)
@@ -78,7 +79,42 @@ def audio_to_fft(audio):
 def path_to_fft(path):
     return audio_to_fft(path_to_audio(path))
 
-model = keras.models.load_model(os.path.join(os.getcwd(), "model.keras"))
+## Functions required by model layers
+@keras.saving.register_keras_serializable()
+def normalise_vector(vect):
+    # get the magnitude for each vector in the batch
+    mag = keras.ops.sqrt(keras.ops.sum(keras.ops.square(vect), axis=1))
+    # repeat this, so we now have as many elements in mag as we do in vect
+    mag = keras.ops.reshape(keras.ops.repeat(mag, vect.shape[1], axis=0), (-1, vect.shape[1]))
+    # element wise division
+    return keras.ops.divide(vect, mag)
+
+@keras.saving.register_keras_serializable()
+def euclidean_distance(vects):
+    x, y = vects
+    x = normalise_vector(x) # this is just doing x = tf.math.l2_normalize(x, axis=1)
+    y = normalise_vector(y) # this is just doing y = tf.math.l2_normalize(y, axis=1)
+
+    sum_square = keras.ops.sum(keras.ops.square(keras.ops.subtract(x, y)), axis=1, keepdims=True)
+    return keras.ops.sqrt(keras.ops.maximum(sum_square, keras.config.epsilon()))
+
+@keras.saving.register_keras_serializable()
+def eucl_dist_output_shape(shapes):
+    shape1, shape2 = shapes
+    return (shape1[0], 1)
+
+@keras.saving.register_keras_serializable()
+def contrastive_loss(y_true, y_pred):
+    '''Contrastive loss from Hadsell-et-al.'06
+    http://yann.lecun.com/exdb/publis/pdf/hadsell-chopra-lecun-06.pdf
+    '''
+    margin = 1
+    square_pred = keras.ops.square(y_pred)
+    margin_square = keras.ops.square(keras.ops.maximum(margin - y_pred, 0))
+    return keras.ops.mean(y_true * square_pred + (1 - y_true) * margin_square)
+
+## Model
+model = keras.models.load_model(os.path.join(os.getcwd(), "model.keras"), compile=False)
 
 # Use this function to predict the distance between two samples
 def predict_distance(first_sample, second_sample):
