@@ -54,28 +54,35 @@ def paths_and_labels_to_dataset(audio_paths, labels):
     label_ds = tf.data.Dataset.from_tensor_slices(labels)
     return tf.data.Dataset.zip((audio_ds, label_ds))
 
+    images = numpy.zeros((2, len(audio_paths), SAMPLING_RATE // 2, 1))
+    label = numpy.zeros(len(audio_paths))
+    
+    for i in range(len(audio_paths)):
+        
+        if (i % 2 == 0):
+            idx1 = random.randint(0, len(audio_paths) - 1)
+            idx2 = random.randint(0, len(audio_paths) - 1)
+            l = 1
+            while (labels[idx1] != labels[idx2]):
+                idx2 = random.randint(0, len(audio_paths) - 1)            
+                
+        else:
+            idx1 = random.randint(0, len(audio_paths) - 1)
+            idx2 = random.randint(0, len(audio_paths) - 1)
+            l = 0
+            while (labels[idx1] == labels[idx2]):
+                idx2 = random.randint(0, len(audio_paths) - 1)
+
+        images[0, i, :, :] = audio_to_fft(path_to_audio(audio_paths[idx1]))[:]
+        images[1, i, :, :] = audio_to_fft(path_to_audio(audio_paths[idx2]))[:]
+        label[i] = l
+
+    return [image_a, image_b], label
+
 def path_to_audio(path):
     """Reads and decodes an audio file."""
     audio = tf.io.read_file(path)
     audio, _ = tf.audio.decode_wav(audio, 1, SAMPLING_RATE)
-    return audio
-
-def add_noise(audio, noises=None, scale=0.5):
-    if noises is not None:
-        # Create a random tensor of the same size as audio ranging from
-        # 0 to the number of noise stream samples that we have.
-        tf_rnd = tf.random.uniform(
-            (tf.shape(audio)[0],), 0, noises.shape[0], dtype=tf.int32
-        )
-        noise = tf.gather(noises, tf_rnd, axis=0)
-
-        # Get the amplitude proportion between the audio and the noise
-        prop = tf.math.reduce_max(audio, axis=1) / tf.math.reduce_max(noise, axis=1)
-        prop = tf.repeat(tf.expand_dims(prop, axis=1), tf.shape(audio)[1], axis=1)
-
-        # Adding the rescaled noise to audio
-        audio = audio + noise * prop * scale
-
     return audio
 
 def audio_to_fft(audio):
@@ -90,7 +97,7 @@ def audio_to_fft(audio):
 
     # Return the absolute value of the first half of the FFT
     # which represents the positive frequencies
-    return tf.math.abs(fft[:, : (audio.shape[1] // 2), :])
+    return tf.math.abs(fft[0:(audio.shape[1] // 2), :])
 
 # Get the list of audio file paths along with their corresponding labels
 class_names = os.listdir(DATASET_AUDIO_PATH)
@@ -138,26 +145,17 @@ valid_audio_paths = audio_paths[-num_val_samples:]
 valid_labels = labels[-num_val_samples:]
 
 # Create 2 datasets, one for training and the other for validation
-train_ds = paths_and_labels_to_dataset(train_audio_paths, train_labels)
-train_ds = train_ds.shuffle(buffer_size=BATCH_SIZE * 8, seed=SHUFFLE_SEED).batch(
-    BATCH_SIZE
-)
+train_x, train_y = paths_and_labels_to_dataset(train_audio_paths, train_labels)
+val_x, val_y = paths_and_labels_to_dataset(valid_audio_paths, valid_labels)
 
-valid_ds = paths_and_labels_to_dataset(valid_audio_paths, valid_labels)
-valid_ds = valid_ds.shuffle(buffer_size=32 * 8, seed=SHUFFLE_SEED).batch(32)
-
-### noise
-
-# Transform audio wave to the frequency domain using `audio_to_fft`
-train_ds = train_ds.map(
-    lambda x, y: (audio_to_fft(x), y), num_parallel_calls=tf.data.AUTOTUNE
-)
-train_ds = train_ds.prefetch(tf.data.AUTOTUNE)
-
-valid_ds = valid_ds.map(
-    lambda x, y: (audio_to_fft(x), y), num_parallel_calls=tf.data.AUTOTUNE
-)
-valid_ds = valid_ds.prefetch(tf.data.AUTOTUNE)
+rng = np.random.RandomState(SHUFFLE_SEED)
+rng.shuffle(train_x)
+rng = np.random.RandomState(SHUFFLE_SEED)
+rng.shuffle(train_y)
+rng = np.random.RandomState(SHUFFLE_SEED)
+rng.shuffle(val_x)
+rng = np.random.RandomState(SHUFFLE_SEED)
+rng.shuffle(val_y)
 
 ## Compile Model
 def residual_block(x, filters, conv_num=3, activation="relu"):
@@ -172,10 +170,8 @@ def residual_block(x, filters, conv_num=3, activation="relu"):
     return keras.layers.MaxPool1D(pool_size=2, strides=2)(x)
 
 
-def build_model(input_shape, num_classes):
-    inputs = keras.layers.Input(shape=input_shape, name="input")
-
-    x = residual_block(inputs, 16, 2)
+def build_model(dummy_input):
+    x = residual_block(dummy_input, 16, 2)
     x = residual_block(x, 32, 2)
     x = residual_block(x, 64, 3)
     x = residual_block(x, 128, 3)
@@ -186,19 +182,63 @@ def build_model(input_shape, num_classes):
     x = keras.layers.Dense(256, activation="relu")(x)
     x = keras.layers.Dense(128, activation="relu")(x)
 
-    outputs = keras.layers.Dense(num_classes, activation="softmax", name="output")(x)
+    return x
 
-    return keras.models.Model(inputs=inputs, outputs=outputs)
+DUMMY_INPUT_SHAPE = (SAMPLING_RATE // 2, 1)
+EMBEDDING_SIZE = 32
 
+dummy_input = keras.layers.Input(shape=DUMMY_INPUT_SHAPE)
+base_network = build_model(dummy_input)
+embedding_layer = keras.layers.Dense(EMBEDDING_SIZE, activation=None)(base_network)
 
-model = build_model((SAMPLING_RATE // 2, 1), len(class_names))
+base_network = keras.Model(dummy_input, embedding_layer, name='SiameseBranch')
+
+input_a = keras.Input(DUMMY_INPUT_SHAPE, name='InputA')
+input_b = keras.Input(DUMMY_INPUT_SHAPE, name='InputB')
+
+embedding_a = base_network(input_a)
+embedding_b = base_network(input_b)
+
+def normalise_vector(vect):
+    # get the magnitude for each vector in the batch
+    mag = keras.ops.sqrt(keras.ops.sum(keras.ops.square(vect), axis=1))
+    # repeat this, so we now have as many elements in mag as we do in vect
+    mag = keras.ops.reshape(keras.ops.repeat(mag, vect.shape[1], axis=0), (-1, vect.shape[1]))
+    # element wise division
+    return keras.ops.divide(vect, mag)
+
+def euclidean_distance(vects):
+    x, y = vects
+    x = normalise_vector(x) # this is just doing x = tf.math.l2_normalize(x, axis=1)
+    y = normalise_vector(y) # this is just doing y = tf.math.l2_normalize(y, axis=1)
+
+    sum_square = keras.ops.sum(keras.ops.square(keras.ops.subtract(x, y)), axis=1, keepdims=True)
+    return keras.ops.sqrt(keras.ops.maximum(sum_square, keras.config.epsilon()))
+
+def eucl_dist_output_shape(shapes):
+    shape1, shape2 = shapes
+    return (shape1[0], 1)
+
+def contrastive_loss(y_true, y_pred):
+    '''Contrastive loss from Hadsell-et-al.'06
+    http://yann.lecun.com/exdb/publis/pdf/hadsell-chopra-lecun-06.pdf
+    '''
+    margin = 1
+    square_pred = keras.ops.square(y_pred)
+    margin_square = keras.ops.square(keras.ops.maximum(margin - y_pred, 0))
+    return keras.ops.mean(y_true * square_pred + (1 - y_true) * margin_square)
+
+distance = keras.layers.Lambda(euclidean_distance,
+                  output_shape=eucl_dist_output_shape)([embedding_a, embedding_b])
+
+model = keras.Model([input_a, input_b], distance)
 
 model.summary()
 
 # Compile the model using Adam's default learning rate
 model.compile(
     optimizer="Adam",
-    loss="sparse_categorical_crossentropy",
+    loss=contrastive_loss,
     metrics=["accuracy"],
 )
 
@@ -209,18 +249,20 @@ model_save_filename = "model.keras"
 
 earlystopping_cb = keras.callbacks.EarlyStopping(patience=10, restore_best_weights=True)
 mdlcheckpoint_cb = keras.callbacks.ModelCheckpoint(
-    model_save_filename, monitor="val_accuracy", save_best_only=True
+    model_save_filename, monitor="val_loss", save_best_only=True
 )
 
 ## Train Model
 history = model.fit(
-    train_ds,
+    train_x,
+    train_y,
     epochs=EPOCHS,
-    validation_data=valid_ds,
+    batch_size=BATCH_SIZE,
+    validation_data=(val_x, val_y),
     callbacks=[earlystopping_cb, mdlcheckpoint_cb],
 )
 
-print(model.evaluate(valid_ds))
+print(model.evaluate((val_x, val_y)))
 
 ## Testing Model
 SAMPLES_TO_DISPLAY = 10
