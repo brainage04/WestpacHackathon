@@ -44,7 +44,7 @@ SAMPLING_RATE = 80000 # 5 seconds long
 SCALE = 0.5
 
 BATCH_SIZE = 32
-EPOCHS = 5
+EPOCHS = 1
 
 ## Generate Dataset
 def paths_and_labels_to_dataset(audio_paths, labels):
@@ -199,6 +199,7 @@ input_b = keras.Input(DUMMY_INPUT_SHAPE, name='InputB')
 embedding_a = base_network(input_a)
 embedding_b = base_network(input_b)
 
+#@keras.saving.register_keras_serializable
 def normalise_vector(vect):
     # get the magnitude for each vector in the batch
     mag = keras.ops.sqrt(keras.ops.sum(keras.ops.square(vect), axis=1))
@@ -207,6 +208,7 @@ def normalise_vector(vect):
     # element wise division
     return keras.ops.divide(vect, mag)
 
+#@keras.saving.register_keras_serializable
 def euclidean_distance(vects):
     x, y = vects
     x = normalise_vector(x) # this is just doing x = tf.math.l2_normalize(x, axis=1)
@@ -215,10 +217,12 @@ def euclidean_distance(vects):
     sum_square = keras.ops.sum(keras.ops.square(keras.ops.subtract(x, y)), axis=1, keepdims=True)
     return keras.ops.sqrt(keras.ops.maximum(sum_square, keras.config.epsilon()))
 
+#@keras.saving.register_keras_serializable
 def eucl_dist_output_shape(shapes):
     shape1, shape2 = shapes
     return (shape1[0], 1)
 
+#@keras.saving.register_keras_serializable
 def contrastive_loss(y_true, y_pred):
     '''Contrastive loss from Hadsell-et-al.'06
     http://yann.lecun.com/exdb/publis/pdf/hadsell-chopra-lecun-06.pdf
@@ -247,10 +251,10 @@ model.compile(
 # 'ModelCheckPoint' to always keep the model that has the best val_accuracy
 model_save_filename = "model.keras"
 
-earlystopping_cb = keras.callbacks.EarlyStopping(patience=10, restore_best_weights=True)
-mdlcheckpoint_cb = keras.callbacks.ModelCheckpoint(
-    model_save_filename, monitor="val_loss", save_best_only=True
-)
+#earlystopping_cb = keras.callbacks.EarlyStopping(patience=10, restore_best_weights=True)
+#mdlcheckpoint_cb = keras.callbacks.ModelCheckpoint(
+#    model_save_filename, monitor="val_loss", save_best_only=True
+#)
 
 ## Train Model
 history = model.fit(
@@ -259,44 +263,40 @@ history = model.fit(
     epochs=EPOCHS,
     batch_size=BATCH_SIZE,
     validation_data=([val_x[0], val_x[1]], val_y),
-    callbacks=[earlystopping_cb, mdlcheckpoint_cb],
+    #callbacks=[earlystopping_cb, mdlcheckpoint_cb],
 )
+
+model.save(model_save_filename)
 
 print(model.evaluate((val_x, val_y)))
 
 ## Testing Model
 SAMPLES_TO_DISPLAY = 10
 
-test_ds = paths_and_labels_to_dataset(valid_audio_paths, valid_labels)
-test_ds = test_ds.shuffle(buffer_size=BATCH_SIZE * 8, seed=SHUFFLE_SEED).batch(
-    BATCH_SIZE
-)
+test_x, test_y = paths_and_labels_to_dataset(valid_audio_paths, valid_labels)
 
-#test_ds = test_ds.map(
-#    lambda x, y: (add_noise(x, noises, scale=SCALE), y),
-#    num_parallel_calls=tf.data.AUTOTUNE,
-#)
+audios = test_x[:SAMPLES_TO_DISPLAY]
+labels = test_x[:SAMPLES_TO_DISPLAY]
 
-for audios, labels in test_ds.take(1):
-    # Get the signal FFT
-    ffts = audio_to_fft(audios)
-    # Predict
-    y_pred = model.predict(ffts)
-    # Take random samples
-    rnd = np.random.randint(0, BATCH_SIZE, SAMPLES_TO_DISPLAY)
-    audios = audios.np()[rnd, :, :]
-    labels = labels.np()[rnd]
-    y_pred = np.argmax(y_pred, axis=-1)[rnd]
+# Get the signal FFT
+ffts = audio_to_fft(audios)
+# Predict
+y_pred = model.predict(ffts)
+# Take random samples
+rnd = np.random.randint(0, BATCH_SIZE, SAMPLES_TO_DISPLAY)
+audios = audios.np()[rnd, :, :]
+labels = labels.np()[rnd]
+y_pred = np.argmax(y_pred, axis=-1)[rnd]
 
-    for index in range(SAMPLES_TO_DISPLAY):
-        # For every sample, print the true and predicted label
-        # as well as run the voice with the noise
-        print(
-            "Speaker:\33{} {}\33[0m\tPredicted:\33{} {}\33[0m".format(
-                "[92m" if labels[index] == y_pred[index] else "[91m",
-                class_names[labels[index]],
-                "[92m" if labels[index] == y_pred[index] else "[91m",
-                class_names[y_pred[index]],
-            )
+for index in range(SAMPLES_TO_DISPLAY):
+    # For every sample, print the true and predicted label
+    # as well as run the voice with the noise
+    print(
+        "Speaker:\33{} {}\33[0m\tPredicted:\33{} {}\33[0m".format(
+            "[92m" if labels[index] == y_pred[index] else "[91m",
+            class_names[labels[index]],
+            "[92m" if labels[index] == y_pred[index] else "[91m",
+            class_names[y_pred[index]],
         )
-        display(Audio(audios[index, :, :].squeeze(), rate=SAMPLING_RATE))
+    )
+    display(Audio(audios[index, :, :].squeeze(), rate=SAMPLING_RATE))
