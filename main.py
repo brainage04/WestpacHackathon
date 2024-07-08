@@ -124,11 +124,12 @@ model = keras.models.load_model(os.path.join(os.getcwd(), "model.keras"), compil
 def predict_distance(samples):
     global model
     prediction = model.predict(samples)
-    return prediction
+    print("Prediction:", prediction)
+    return prediction[0][0]
 
 # Use THIS function to check if two samples are spoken by the same user
 def spoken_by_same_user(samples):
-    if predict_distance(samples) > 0.05:
+    if predict_distance(samples) < 0.4:
         return True
     else:
         return False
