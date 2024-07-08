@@ -52,6 +52,7 @@ Builder.load_file('assistant.kv')
 import keras
 import os
 import tensorflow as tf
+import numpy as np
 
 SAMPLING_RATE = 80000 # 5 seconds long
 
@@ -66,6 +67,7 @@ def audio_to_fft(audio):
     # Since tf.signal.fft applies FFT on the innermost dimension,
     # we need to squeeze the dimensions and then expand them again
     # after FFT
+    og_size = audio.shape[0]
     audio = tf.squeeze(audio, axis=-1)
     fft = tf.signal.fft(
         tf.cast(tf.complex(real=audio, imag=tf.zeros_like(audio)), tf.complex64)
@@ -74,7 +76,7 @@ def audio_to_fft(audio):
 
     # Return the absolute value of the first half of the FFT
     # which represents the positive frequencies
-    return tf.math.abs(fft[0:(SAMPLING_RATE // 2), :])
+    return tf.math.abs(fft[0:(og_size // 2), :])
 
 def path_to_fft(path):
     return audio_to_fft(path_to_audio(path))
@@ -117,13 +119,14 @@ def contrastive_loss(y_true, y_pred):
 model = keras.models.load_model(os.path.join(os.getcwd(), "model.keras"), compile=False)
 
 # Use this function to predict the distance between two samples
-def predict_distance(first_sample, second_sample):
-    prediction = model.predict([first_sample, second_sample])
+def predict_distance(samples):
+    global model
+    prediction = model.predict(samples)
     return prediction
 
 # Use THIS function to check if two samples are spoken by the same user
-def spoken_by_same_user(first_sample, second_sample):
-    if predict_distance(first_sample, second_sample) > 0.02:
+def spoken_by_same_user(samples):
+    if predict_distance(samples) > 0.05:
         return True
     else:
         return False
@@ -207,13 +210,49 @@ def continuous_recording():
             try:
                 # Extract raw audio data
                 raw_audio = audio.get_raw_data()
-                waveFilePath = os.path.join('Sounds', 'recording.wav')
+                waveFilePath = os.path.join(os.getcwd(), 'Sounds', 'Thomas', 'thomas_new.wav')
+
                 # Save the raw audio data to a wave file
                 with wave.open(waveFilePath, 'wb') as f:
                     f.setnchannels(1)
                     f.setsampwidth(audio.sample_width)
                     f.setframerate(audio.sample_rate)
                     f.writeframes(raw_audio)
+
+                # Crop audio data to 5 second clip
+                waveFileNewBefore = path_to_fft(waveFilePath) # (N, 1), we want this to be (40000, 1)
+                waveFileNew = np.zeros(shape=(40000, 1))
+
+                # if recorded audio is larger, just transfer the last 5 seconds over
+                if (waveFileNewBefore.shape[0] > SAMPLING_RATE // 2):
+                    waveFileNew[:, :] = waveFileNewBefore[-40000:, :]
+                # if recorded audio is smaller, transfer everything over
+                else:
+                    waveFileNew[:len(waveFileNewBefore), :] = waveFileNewBefore[:, :]
+
+                waveFileOriginalBefore = path_to_fft(os.path.join(os.getcwd(), 'Sounds', 'Thomas', 'thomas_original.wav'))
+                waveFileOriginal = np.zeros(shape=(40000, 1))
+
+                # if recorded audio is larger, just transfer the last 5 seconds over
+                if (waveFileOriginalBefore.shape[0] > SAMPLING_RATE // 2):
+                    waveFileOriginal[:, :] = waveFileOriginalBefore[-40000:, :]
+                # if recorded audio is smaller, transfer everything over
+                else:
+                    waveFileOriginal[:len(waveFileOriginalBefore), :] = waveFileOriginalBefore[:, :]
+
+                print("New:", waveFileNew.shape)
+                print("Original:", waveFileOriginal.shape)
+
+                # reshape both to have a batch dimension of 1
+                waveFileNew = tf.reshape(waveFileNew, (1, 40000, 1))
+                waveFileOriginal = tf.reshape(waveFileOriginal, (1, 40000, 1))
+
+                same_user = spoken_by_same_user([waveFileNew, waveFileOriginal])
+
+                if same_user == True:
+                    print("User Thomas has been authenticated.")
+                else:
+                    print("User is not Thomas! Authentication cancelled.")
 
                 text = recognizer.recognize_google(audio)
                 print("Recognized:", text)
