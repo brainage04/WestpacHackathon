@@ -129,7 +129,7 @@ def predict_distance(samples):
 
 # Use THIS function to check if two samples are spoken by the same user
 def spoken_by_same_user(samples):
-    if predict_distance(samples) < 0.4:
+    if predict_distance(samples) < 0.5:
         return True
     else:
         return False
