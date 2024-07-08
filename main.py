@@ -44,6 +44,8 @@ audioTimeOut = 90
 typingSubmit = False
 additionalAssistancePlayed = False
 
+same_user = True
+
 # Load the Kv files
 Builder.load_file('login.kv')
 Builder.load_file('assistant.kv')
@@ -184,7 +186,7 @@ def waitingTyping():
 def continuous_recording():
     global recorded_text
     global audio_playing
-    
+    global same_user
     print("Recording started...")
     recognizer = sr.Recognizer()
     microphone = sr.Microphone()
@@ -335,8 +337,8 @@ class LoginScreen(Screen):
     def passwordAuthenticate(self, passwordCorrect):
         # Construct the full path to the sound file
         global audio_playing
-
-        if passwordCorrect:
+        global same_user
+        if passwordCorrect and same_user:
             playAudioPath = os.path.join('Sounds', "AuthenthicateMerge.mp3")
             Clock.schedule_once(lambda dt: self.change_to_assistant_screen())
         else:
